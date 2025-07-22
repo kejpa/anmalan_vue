@@ -1,41 +1,52 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { onMounted, ref } from 'vue'
+import SplashScreen from '@/components/SplashScreen.vue'
+import LoginScreen from '@/components/LoginScreen.vue'
+
+const showScreen = ref('splash')
+
+onMounted(() => {
+  // Prova logga in
+
+  // Visa login-sida vid misslyckad inloggning
+  showScreen.value = 'login'
+
+  // Visa lista vid lyckad inloggning
+})
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
+  <template v-if="showScreen !=='home'">
+    <header></header>
+  <SplashScreen v-if="showScreen === 'splash'" />
+  <LoginScreen v-else-if="showScreen === 'login'" />
+  </template>
+  <template v-else>
+    <header>
+      <img class="logo" alt="Logo" src="@/assets/logo.svg" />
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
-    </div>
-  </header>
+    </header>
 
-  <RouterView />
+    <RouterView />
+    <footer>
+      <p>© 2025 Kjell Hansen</p>
+    </footer>
+  </template>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
 }
 
 nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
+  margin: 0.5rem 0;
 }
 
 nav a.router-link-exact-active {
@@ -56,6 +67,14 @@ nav a:first-of-type {
   border: 0;
 }
 
+.logo {
+  display: none;
+}
+footer {
+  border-top: 3px double var(--color-border);
+  text-align: center;
+}
+
 @media (min-width: 1024px) {
   header {
     display: flex;
@@ -64,7 +83,9 @@ nav a:first-of-type {
   }
 
   .logo {
+    display: initial;
     margin: 0 2rem 0 0;
+    width: 80px;
   }
 
   header .wrapper {
