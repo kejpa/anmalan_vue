@@ -1,6 +1,9 @@
 <script setup>
 import APIServices from '@/services/APIServices.js'
 import { storeAccessToken } from '@/stores/accessTokenStorage.js'
+import useUserStore from '@/stores/userStore.js'
+
+const emit = defineEmits(['logonEvent'])
 
 function LoggaIn() {
   APIServices.post('login', {
@@ -8,7 +11,14 @@ function LoggaIn() {
     password: document.querySelector('input[name="password"]').value,
   })
     .then((data) => {
+      // Spara access token i localStorage
       storeAccessToken(data.jwt)
+      // Spara användaren i UserStore
+      let userStore= useUserStore()
+      userStore.setUser(data.user)
+
+      // emitta en händelse för att meddela att inloggningen lyckades
+      emit('logonEvent', 'ok')
     })
     .catch((error) => {
       console.error('Fel vid inloggning:', error)

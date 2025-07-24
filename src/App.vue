@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import SplashScreen from '@/components/SplashScreen.vue'
-import LoginScreen from '@/components/LoginScreen.vue'
+import { RouterLink, RouterView } from 'vue-router'
+import SplashScreen from './components/SplashScreen.vue'
+import LoginScreen from './components/LoginScreen.vue'
 
 const showScreen = ref('splash')
 
@@ -16,10 +17,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <template v-if="showScreen !=='home'">
+  <template v-if="showScreen !== 'home'">
     <header></header>
-  <SplashScreen v-if="showScreen === 'splash'" />
-  <LoginScreen v-else-if="showScreen === 'login'" />
+    <SplashScreen v-if="showScreen === 'splash'" />
+    <LoginScreen v-else-if="showScreen === 'login'" @logonEvent="showScreen = 'home'" />
   </template>
   <template v-else>
     <header>
@@ -70,6 +71,7 @@ nav a:first-of-type {
 .logo {
   display: none;
 }
+
 footer {
   border-top: 3px double var(--color-border);
   text-align: center;
