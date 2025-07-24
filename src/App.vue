@@ -3,6 +3,9 @@ import { onMounted, ref } from 'vue'
 import APIServices from '@/services/APIServices.js'
 import { storeAccessToken } from '@/stores/accessTokenStorage.js'
 import useUserStore from '@/stores/userStore.js'
+import SplashScreen  from '@/components/SplashScreen.vue'
+import LoginScreen from '@/components/LoginScreen.vue'
+import { RouterLink, RouterView } from 'vue-router'
 
 const showScreen = ref('splash')
 
@@ -13,18 +16,30 @@ onMounted(() => {
       // Spara access token i localStorage
       storeAccessToken(data.jwt)
       // Spara användaren i UserStore
-      let userStore= useUserStore()
+      let userStore = useUserStore()
       userStore.setUser(data.user)
 
       // Visa lista vid lyckad inloggning
       showScreen.value = 'home'
     })
-    .catch((error) => {
-      console.error('Login failed:', error)
+    .catch(async (error) => {
+      console.error('Login failed:', await (error))
       // Visa login-sida vid misslyckad inloggning
       showScreen.value = 'login'
     })
 })
+
+function logout() {
+  // Rensa access token och användare
+  APIServices.delete('refresh').then((data) => {
+    storeAccessToken('')
+    let userStore = useUserStore()
+    userStore.setUser(null)
+  })
+
+  // Visa login-sida
+  showScreen.value = 'login'
+}
 </script>
 
 <template>
@@ -36,6 +51,7 @@ onMounted(() => {
   <template v-else>
     <header>
       <img class="logo" alt="Logo" src="@/assets/logo.svg" />
+      <img class="logout" alt="Logout" @click="logout()" src="@/assets/logout.png" />
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
@@ -83,6 +99,14 @@ nav a:first-of-type {
   display: none;
 }
 
+.logout {
+  position: absolute;
+  right: 5vw;
+  top: 1rem;
+  width: 8vw;
+  cursor: pointer;
+}
+
 footer {
   border-top: 3px double var(--color-border);
   text-align: center;
@@ -99,6 +123,10 @@ footer {
     display: initial;
     margin: 0 2rem 0 0;
     width: 80px;
+  }
+
+  .logout {
+    width: 50px;
   }
 
   header .wrapper {
