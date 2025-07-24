@@ -1,23 +1,34 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
-import SplashScreen from './components/SplashScreen.vue'
-import LoginScreen from './components/LoginScreen.vue'
+import APIServices from '@/services/APIServices.js'
+import { storeAccessToken } from '@/stores/accessTokenStorage.js'
+import useUserStore from '@/stores/userStore.js'
 
 const showScreen = ref('splash')
 
 onMounted(() => {
   // Prova logga in
+  APIServices.get('check')
+    .then((data) => {
+      // Spara access token i localStorage
+      storeAccessToken(data.jwt)
+      // Spara användaren i UserStore
+      let userStore= useUserStore()
+      userStore.setUser(data.user)
 
-  // Visa login-sida vid misslyckad inloggning
-  showScreen.value = 'login'
-
-  // Visa lista vid lyckad inloggning
+      // Visa lista vid lyckad inloggning
+      showScreen.value = 'home'
+    })
+    .catch((error) => {
+      console.error('Login failed:', error)
+      // Visa login-sida vid misslyckad inloggning
+      showScreen.value = 'login'
+    })
 })
 </script>
 
 <template>
-  <template v-if="showScreen !== 'home'">
+  <template v-if="['splash', 'login'].includes(showScreen)">
     <header></header>
     <SplashScreen v-if="showScreen === 'splash'" />
     <LoginScreen v-else-if="showScreen === 'login'" @logonEvent="showScreen = 'home'" />
