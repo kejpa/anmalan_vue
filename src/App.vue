@@ -56,7 +56,7 @@ function logout() {
         <img class="logo" alt="Logo" src="@/assets/logo.svg" />
         <p>Väkommen {{ user ? user.firstname : '' }}</p>
       </div>
-      <img class="logout" alt="Logout" @click="logout()" src="@/assets/logout.png" />
+      <img class="logout" alt="Logout" @click="logout()" src="@/assets/images/logout.png" />
       <nav>
         <RouterLink to="/">Tävlingar</RouterLink>
         <RouterLink to="/about">About</RouterLink>

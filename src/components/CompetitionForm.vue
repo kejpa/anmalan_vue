@@ -9,6 +9,17 @@ const competition = ref({})
 onMounted(() => {
   competition.value = competitionStore.getCompetition()
 })
+
+function addSession(e) {
+  e.preventDefault()
+  let session = {
+    number: competition.value.sessions.length + 1,
+    name: 'Session ' + (competition.value.sessions.length + 1),
+    date: competition.value.sessions[competition.value.sessions.length-1]?.date || (competition.value.date || ''),
+    daytime: ''
+  }
+  competition.value.sessions.push(session)
+}
 </script>
 
 <template>
@@ -43,6 +54,10 @@ onMounted(() => {
     <fieldset id="times">
       <legend>Anmälningstider</legend>
       <label>
+        Anmälan senast:
+        <input type="date" v-model="competition.lastEntryDate" required />
+      </label>
+      <label>
         Tider uppnådda from:
         <input type="date" v-model="competition.swimTimePeridStartDate" required />
       </label>
@@ -61,7 +76,6 @@ onMounted(() => {
     </fieldset>
     <fieldset id="admin">
       <legend>Admin</legend>
-
       <label>
         Lägg till grenar:
         <input type="checkbox" v-model="competition.addEvents" />
@@ -74,18 +88,7 @@ onMounted(() => {
     <fieldset id="sessions">
       <legend>Tävlingspass</legend>
       <SessionsList :sessions="competition.sessions" />
-      <label>
-        Lägg till pass:
-        <input type="checkbox" v-model="competition.addSessions" />
-      </label>
-      <label>
-        Redigera pass:
-        <input type="checkbox" v-model="competition.editSessions" />
-      </label>
-      <label>
-        Ta bort pass:
-        <input type="checkbox" v-model="competition.removeSessions" />
-      </label>
+        <button @click="addSession">Lägg till pass</button>
     </fieldset>
     <fieldset id="events">
       <legend>Grenar</legend>

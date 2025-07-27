@@ -12,10 +12,11 @@ const useCompetitionStore = defineStore('competitionStore', () => {
     sessions: [{
       number:1,
       name: 'Session 1',
-      date: '',
-      daytime: ''
+      date: '2023-10-01',
+      daytime: '15:39'
     }],
     events: [],
+    lastEntryDate: '',
     swimTimePeridStartDate: '',
     swimTimePeridEndDate: '',
     allowRegisterSwimTimes: false,
