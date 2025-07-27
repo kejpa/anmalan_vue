@@ -8,6 +8,7 @@ import LoginScreen from '@/components/LoginScreen.vue'
 import { RouterLink, RouterView } from 'vue-router'
 
 const showScreen = ref('splash')
+const user = ref(useUserStore().getUser())
 
 onMounted(() => {
   // Prova logga in
@@ -18,6 +19,7 @@ onMounted(() => {
       // Spara användaren i UserStore
       let userStore = useUserStore()
       userStore.setUser(data.user)
+      user.value = data.user
 
       // Visa lista vid lyckad inloggning
       showScreen.value = 'home'
@@ -50,10 +52,13 @@ function logout() {
   </template>
   <template v-else>
     <header>
-      <img class="logo" alt="Logo" src="@/assets/logo.svg" />
+      <div>
+        <img class="logo" alt="Logo" src="@/assets/logo.svg" />
+        <p>Väkommen {{ user ? user.firstname : '' }}</p>
+      </div>
       <img class="logout" alt="Logout" @click="logout()" src="@/assets/logout.png" />
       <nav>
-        <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/">Tävlingar</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </header>
