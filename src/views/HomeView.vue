@@ -19,7 +19,10 @@ main {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  max-width: 70vw;
   padding: 1rem;
+}
+@media (min-width: 1024px) {
+  max-width: 70vw;
+
 }
 </style>

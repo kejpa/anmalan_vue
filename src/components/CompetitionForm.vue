@@ -1,24 +1,48 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import useCompetitionStore from '@/stores/competitionStore.js'
-import SessionsList from '@/components/SessionsList.vue'
+import { onMounted, ref } from "vue";
+import useCompetitionStore from "@/stores/competitionStore.js";
+import SessionsList from "@/components/SessionsList.vue";
+import EventsList from "@/components/EventsList.vue";
+import useSwimstyleStore from "@/stores/swimstyleStore.js";
 
-const competitionStore = useCompetitionStore()
-const competition = ref({})
+const competitionStore = useCompetitionStore();
+const swimstyleStore = useSwimstyleStore();
+const events = ref([]);
+
+const competition = ref({});
 
 onMounted(() => {
-  competition.value = competitionStore.getCompetition()
-})
+  competition.value = competitionStore.getCompetition();
+  swimstyleStore.fetch().then(() => {
+    events.value = swimstyleStore.getAll();
+  });
+});
 
 function addSession(e) {
-  e.preventDefault()
+  e.preventDefault();
   let session = {
     number: competition.value.sessions.length + 1,
-    name: 'Session ' + (competition.value.sessions.length + 1),
-    date: competition.value.sessions[competition.value.sessions.length-1]?.date || (competition.value.date || ''),
-    daytime: ''
-  }
-  competition.value.sessions.push(session)
+    name: "Session " + (competition.value.sessions.length + 1),
+    date:
+      competition.value.sessions[competition.value.sessions.length - 1]?.date ||
+      competition.value.date ||
+      "",
+    daytime: "",
+  };
+  competition.value.sessions.push(session);
+}
+
+function addEvent(e) {
+  e.preventDefault();
+  let event = {
+    number: competition.value.events.length + 1,
+    name: " ",
+    swimstyleid: 0,
+    utmanare: false,
+    agegroups: [{ agegroupid: 1, agemin: 0, agemax: 99 }],
+    session: 1,
+  };
+  competition.value.events.push(event);
 }
 </script>
 
@@ -59,11 +83,19 @@ function addSession(e) {
       </label>
       <label>
         Tider uppnådda from:
-        <input type="date" v-model="competition.swimTimePeridStartDate" required />
+        <input
+          type="date"
+          v-model="competition.swimTimePeridStartDate"
+          required
+        />
       </label>
       <label>
         Tider uppnådda till:
-        <input type="date" v-model="competition.swimTimePeridEndDate" required />
+        <input
+          type="date"
+          v-model="competition.swimTimePeridEndDate"
+          required
+        />
       </label>
       <label>
         Redigera anmälningstider:
@@ -88,10 +120,16 @@ function addSession(e) {
     <fieldset id="sessions">
       <legend>Tävlingspass</legend>
       <SessionsList :sessions="competition.sessions" />
-        <button @click="addSession">Lägg till pass</button>
+      <button @click="addSession">Lägg till pass</button>
     </fieldset>
     <fieldset id="events">
       <legend>Grenar</legend>
+      <EventsList
+        :events="competition.events"
+        :sessions="competition.sessions?.count ?? 0"
+        :eventsList="events.filter(e => e.course === competition.course)"
+      />
+      <button @click="addEvent">Lägg till gren</button>
     </fieldset>
     <button type="submit">Skapa Tävling</button>
   </form>
@@ -116,5 +154,9 @@ label {
 
 #sessions {
   clear: left;
+}
+
+@media (min-width: 1024px) {
+
 }
 </style>

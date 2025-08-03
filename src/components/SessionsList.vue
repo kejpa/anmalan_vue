@@ -21,9 +21,9 @@ function removeSession(sessionNumber) {
 
 <template>
   <ul v-for="session in props.sessions" :key="session.number">
-    <template v-if="editSession === session">
+      <li><img :src="remove" alt="Radera" @click="removeSession(session.number)"/></li>
       <li>
-        <input type="number" min="1" v-model="session.number" size="1" />
+        <input type="text" v-model="session.number" size="1" disabled />
       </li>
       <li>
         <input type="text" v-model="session.name" />
@@ -34,24 +34,13 @@ function removeSession(sessionNumber) {
       <li>
         <input type="time" v-model="session.daytime" />
       </li>
-      <li><img :src="save" alt="Spara" @click="editSession=null"/></li>
-      <li></li>
-    </template>
-    <template v-else>
-      <li>{{ session.number }}</li>
-      <li>{{ session.name }}</li>
-      <li>{{ session.date }}</li>
-      <li>{{ session.daytime }}</li>
-      <li><img :src="edit" alt="Redigera"  @click="editSession=session"/></li>
-      <li><img :src="remove" alt="Radera" @click="removeSession(session.number)"/></li>
-    </template>
   </ul>
 </template>
 
 <style scoped>
 ul {
   display: grid;
-  grid-template-columns: 3rem 12rem 8rem 4.5rem 2rem 2rem;
+  grid-template-columns:2rem 3rem 12rem 8rem 4.5rem;
   margin: 0;
   padding: 0;
 }
