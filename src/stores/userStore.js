@@ -14,4 +14,4 @@ const useUserStore = defineStore('userStore', () => {
 
   return { setUser, getUser }
 })
-export default useUserStore;
+export default useUserStore

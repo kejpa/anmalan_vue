@@ -14,7 +14,7 @@ function LoggaIn() {
       // Spara access token i localStorage
       storeAccessToken(data.jwt)
       // Spara användaren i UserStore
-      let userStore= useUserStore()
+      let userStore = useUserStore()
       userStore.setUser(data.user)
 
       // emitta en händelse för att meddela att inloggningen lyckades

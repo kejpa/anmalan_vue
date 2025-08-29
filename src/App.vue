@@ -1,43 +1,46 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import APIServices from "@/services/APIServices.js";
-import { storeAccessToken } from "@/stores/accessTokenStorage.js";
-import useUserStore from "@/stores/userStore.js";
+import { onMounted, ref } from 'vue'
+import APIServices from '@/services/APIServices.js'
+import { storeAccessToken } from '@/stores/accessTokenStorage.js'
+import useUserStore from '@/stores/userStore.js'
+import SplashScreen from '@/components/SplashScreen.vue'
+import LoginScreen from '@/components/LoginScreen.vue'
+import { RouterLink, RouterView } from 'vue-router'
 
-const showScreen = ref("splash");
-const user = ref(useUserStore().getUser());
+const showScreen = ref('splash')
+const user = ref(useUserStore().getUser())
 
 onMounted(() => {
   // Prova logga in
-  APIServices.get("check")
+  APIServices.get('check')
     .then((data) => {
       // Spara access token i localStorage
-      storeAccessToken(data.jwt);
+      storeAccessToken(data.jwt)
       // Spara användaren i UserStore
-      let userStore = useUserStore();
-      userStore.setUser(data.user);
-      user.value = data.user;
+      let userStore = useUserStore()
+      userStore.setUser(data.user)
+      user.value = data.user
 
       // Visa lista vid lyckad inloggning
-      showScreen.value = "home";
+      showScreen.value = 'home'
     })
     .catch(async (error) => {
-      console.error("Login failed:", await error);
+      console.error('Login failed:', await error)
       // Visa login-sida vid misslyckad inloggning
-      showScreen.value = "login";
-    });
-});
+      showScreen.value = 'login'
+    })
+})
 
 function logout() {
   // Rensa access token och användare
-  APIServices.delete("refresh").then((data) => {
-    storeAccessToken("");
-    let userStore = useUserStore();
-    userStore.setUser(null);
-  });
+  APIServices.delete('refresh').then((data) => {
+    storeAccessToken('')
+    let userStore = useUserStore()
+    userStore.setUser(null)
+  })
 
   // Visa login-sida
-  showScreen.value = "login";
+  showScreen.value = 'login'
 }
 </script>
 
@@ -45,23 +48,15 @@ function logout() {
   <template v-if="['splash', 'login'].includes(showScreen)">
     <header></header>
     <SplashScreen v-if="showScreen === 'splash'" />
-    <LoginScreen
-      v-else-if="showScreen === 'login'"
-      @logonEvent="showScreen = 'home'"
-    />
+    <LoginScreen v-else-if="showScreen === 'login'" @logonEvent="showScreen = 'home'" />
   </template>
   <template v-else>
     <header>
       <div>
         <img class="logo" alt="Logo" src="@/assets/logo.svg" />
-        <p>Väkommen {{ user ? user.firstname : "" }}</p>
+        <p>Väkommen {{ user ? user.firstname : '' }}</p>
       </div>
-      <img
-        class="logout"
-        alt="Logout"
-        @click="logout()"
-        src="@/assets/images/logout.png"
-      />
+      <img class="logout" alt="Logout" @click="logout()" src="@/assets/images/logout.png" />
       <nav>
         <RouterLink to="/">Tävlingar</RouterLink>
         <RouterLink to="/about">About</RouterLink>

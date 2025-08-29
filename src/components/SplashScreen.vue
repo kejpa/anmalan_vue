@@ -1,23 +1,20 @@
 <script setup>
-import splash from "@/assets/logo.svg";
-
-
+import splash from '@/assets/logo.svg'
 </script>
 
 <template>
   <main>
-  <img alt="Splash logo" :src="splash"/>
-  <p>Loading...</p>
+    <img alt="Splash logo" :src="splash" />
+    <p>Loading...</p>
   </main>
-
 </template>
 
 <style scoped>
 main {
   display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 img {
   display: block;

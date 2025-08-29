@@ -1,56 +1,64 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import useCompetitionStore from "@/stores/competitionStore.js";
-import SessionsList from "@/components/SessionsList.vue";
-import EventsList from "@/components/EventsList.vue";
-import useSwimstyleStore from "@/stores/swimstyleStore.js";
+import { onMounted, ref } from 'vue'
+import useCompetitionStore from '@/stores/competitionStore.js'
+import useSwimstyleStore from '@/stores/swimstyleStore.js'
 
-const competitionStore = useCompetitionStore();
-const swimstyleStore = useSwimstyleStore();
-const events = ref([]);
+const competitionStore = useCompetitionStore()
+const swimstyleStore = useSwimstyleStore()
+const events = ref([])
 
-const competition = ref({});
+const competition = ref({})
 
 onMounted(() => {
-  competition.value = competitionStore.getCompetition();
+  competition.value = competitionStore.getCompetition()
   swimstyleStore.fetch().then(() => {
-    events.value = swimstyleStore.getAll();
-  });
-});
+    events.value = swimstyleStore.getAll()
+  })
+})
 
 function addSession(e) {
-  e.preventDefault();
+  e.preventDefault()
   let session = {
     number: competition.value.sessions.length + 1,
-    name: "Session " + (competition.value.sessions.length + 1),
+    name: 'Session ' + (competition.value.sessions.length + 1),
     date:
       competition.value.sessions[competition.value.sessions.length - 1]?.date ||
       competition.value.date ||
-      "",
-    daytime: "",
-  };
-  competition.value.sessions.push(session);
+      '',
+    daytime: '',
+  }
+  competition.value.sessions.push(session)
 }
 
 function addEvent(e) {
-  e.preventDefault();
+  e.preventDefault()
   let event = {
     number: competition.value.events.length + 1,
-    name: " ",
+    name: ' ',
     swimstyleid: 0,
     utmanare: false,
     agegroups: [{ agegroupid: 1, agemin: 0, agemax: 99 }],
     session: 1,
-  };
-  competition.value.events.push(event);
+  }
+  competition.value.events.push(event)
+}
+
+function submitCompetition(e) {
+  e.preventDefault()
+  competitionStore.setCompetition(competition.value)
+  competitionStore.saveCompetition().then(() => {
+    alert('Tävlingen har skapats!')
+  })
 }
 </script>
-
 <template>
   <h1>Skapa Tävling</h1>
   <form @submit="submitCompetition">
     <fieldset id="main">
       <legend>Tävling</legend>
+      <label>
+        ID: <span>{{ competition.id }}</span>
+      </label>
       <label>
         Namn:
         <input type="text" v-model="competition.name" required />
@@ -83,19 +91,11 @@ function addEvent(e) {
       </label>
       <label>
         Tider uppnådda from:
-        <input
-          type="date"
-          v-model="competition.swimTimePeridStartDate"
-          required
-        />
+        <input type="date" v-model="competition.swimTimePeridStartDate" required />
       </label>
       <label>
         Tider uppnådda till:
-        <input
-          type="date"
-          v-model="competition.swimTimePeridEndDate"
-          required
-        />
+        <input type="date" v-model="competition.swimTimePeridEndDate" required />
       </label>
       <label>
         Redigera anmälningstider:
@@ -109,27 +109,31 @@ function addEvent(e) {
     <fieldset id="admin">
       <legend>Admin</legend>
       <label>
-        Lägg till grenar:
-        <input type="checkbox" v-model="competition.addEvents" />
+        Administrera tävlingspass:
+        <input type="checkbox" v-model="competition.addSessions" />
       </label>
       <label>
-        Ändra grenordning:
-        <input type="checkbox" v-model="competition.reorderEvents" />
+        Administrera grenar:
+        <input type="checkbox" v-model="competition.addEvents" />
       </label>
     </fieldset>
     <fieldset id="sessions">
       <legend>Tävlingspass</legend>
-      <SessionsList :sessions="competition.sessions" />
-      <button @click="addSession">Lägg till pass</button>
+      <SessionsList
+        :sessions="competition.sessions"
+        :editSession="competition.addSessions ?? false"
+      />
+      <button v-if="competition.addSessions ?? false" @click="addSession">Lägg till pass</button>
     </fieldset>
     <fieldset id="events">
       <legend>Grenar</legend>
       <EventsList
         :events="competition.events"
-        :sessions="competition.sessions?.count ?? 0"
-        :eventsList="events.filter(e => e.course === competition.course)"
+        :sessions="competition.sessions ?? null"
+        :eventsList="events.filter((e) => e.course === competition.course)"
+        :addEvents="competition.addEvents ?? false"
       />
-      <button @click="addEvent">Lägg till gren</button>
+      <button v-if="competition.addEvents" @click="addEvent">Lägg till gren</button>
     </fieldset>
     <button type="submit">Skapa Tävling</button>
   </form>
@@ -157,6 +161,5 @@ label {
 }
 
 @media (min-width: 1024px) {
-
 }
 </style>

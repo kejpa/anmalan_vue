@@ -3,10 +3,9 @@ import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/userStore.js'
 import CompetitionForm from '@/components/CompetitionForm.vue'
 
-const user=ref(useUserStore().getUser())
+const user = ref(useUserStore().getUser())
 
-onMounted(() => {
-})
+onMounted(() => {})
 </script>
 
 <template>
@@ -23,6 +22,5 @@ main {
 }
 @media (min-width: 1024px) {
   max-width: 70vw;
-
 }
 </style>
