@@ -1,65 +1,87 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import {defineStore} from 'pinia'
+import {ref} from 'vue'
 import APIServices from "@/services/APIServices.js";
 
 const useCompetitionStore = defineStore('competitionStore', () => {
-  const competition = ref({
-    id: '',
-    name: '',
-    city: '',
-    country: '',
-    date: '',
-    course: 'SCM',
-    sessions: [
-      {
-        number: 1,
-        name: 'Session 1',
-        date: '2023-10-01',
-        daytime: '15:39',
-      },
-    ],
-    events: [],
-    lastEntryDate: '',
-    swimtimesFrom: '',
-    swimtimesTo: '',
-    editSwimtimes: false,
-    editSessions: false,
-    editEvents: false,
-  })
-
-  function setCompetition(newCompetition) {
-    competition.value = newCompetition
-  }
-
-  function getCompetition() {
-    return competition.value
-  }
-
-  function saveCompetition() {
-    return new Promise((resolve, reject) => {
-      if (competition.value.id) {
-        APIServices.put('saveCompetition', competition.value)
-          .then(() => {
-            resolve(true)
-          })
-          .catch((error) => {
-            console.error('Error updating competition:', error)
-            reject(error)
-          })
-      } else {
-        APIServices.post('saveCompetition', competition.value)
-          .then((data) => {
-            competition.value.id = data.id
-            resolve(true)
-          })
-          .catch((error) => {
-            console.error('Error creating competition:', error)
-            reject(error)
-          })
-      }
+    const competition = ref({
+        id: '',
+        name: '',
+        city: '',
+        country: '',
+        date: '',
+        course: 'SCM',
+        sessions: [
+            {
+                number: 1,
+                name: 'Session 1',
+                date: '2023-10-01',
+                daytime: '15:39',
+            },
+        ],
+        events: [],
+        lastEntryDate: '',
+        swimtimesFrom: '',
+        swimtimesTo: '',
+        editSwimtimes: false,
+        editSessions: false,
+        editEvents: false,
     })
-  }
 
-  return { setCompetition, getCompetition, saveCompetition }
+    function setCompetition(newCompetition) {
+        competition.value = newCompetition
+    }
+
+    function getCompetition(id) {
+        return new Promise((resolve, reject) => {
+            APIServices.get('getCompetition/' + id)
+                .then((data) => {
+                    resolve(data)
+                })
+                .catch((error) => {
+                    console.error('Error fetching competition:', error)
+                    reject(error)
+                })
+        })
+    }
+
+    function getAll() {
+        return new Promise((resolve, reject) => {
+            APIServices.get('getCompetitions')
+                .then((data) => {
+                    resolve(data)
+                })
+                .catch((error) => {
+                    console.error('Error fetching competitions:', error)
+                    reject(error)
+                })
+        })
+    }
+
+    function saveCompetition() {
+        return new Promise((resolve, reject) => {
+            if (competition.value.id) {
+                APIServices.put('saveCompetition', competition.value)
+                    .then(() => {
+                        resolve(true)
+                    })
+                    .catch((error) => {
+                        console.error('Error updating competition:', error)
+                        reject(error)
+                    })
+            } else {
+                APIServices.post('saveCompetition', competition.value)
+                    .then((data) => {
+                        competition.value.id = data.id
+                        resolve(true)
+                    })
+                    .catch((error) => {
+                        console.error('Error creating competition:', error)
+                        reject(error)
+                    })
+            }
+        })
+    }
+
+    return {setCompetition, getCompetition, saveCompetition, getAll}
 })
 export default useCompetitionStore
