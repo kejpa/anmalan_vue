@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import APIServices from "@/services/APIServices.js";
 
 const useCompetitionStore = defineStore('competitionStore', () => {
   const competition = ref({
@@ -19,12 +20,11 @@ const useCompetitionStore = defineStore('competitionStore', () => {
     ],
     events: [],
     lastEntryDate: '',
-    swimTimePeridStartDate: '',
-    swimTimePeridEndDate: '',
-    allowRegisterSwimTimes: false,
-    currentCourseOnly: false,
-    addEvents: false,
-    reorderEvents: false,
+    swimtimesFrom: '',
+    swimtimesTo: '',
+    editSwimtimes: false,
+    editSessions: false,
+    editEvents: false,
   })
 
   function setCompetition(newCompetition) {

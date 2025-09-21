@@ -1,7 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import {onMounted, ref} from 'vue'
 import useCompetitionStore from '@/stores/competitionStore.js'
 import useSwimstyleStore from '@/stores/swimstyleStore.js'
+import SessionsList from "@/components/SessionsList.vue";
+import EventsList from "@/components/EventsList.vue";
 
 const competitionStore = useCompetitionStore()
 const swimstyleStore = useSwimstyleStore()
@@ -37,7 +39,7 @@ function addEvent(e) {
     name: ' ',
     swimstyleid: 0,
     utmanare: false,
-    agegroups: [{ agegroupid: 1, agemin: 0, agemax: 99 }],
+    agegroups: [{agegroupid: 1, agemin: 0, agemax: 99}],
     session: 1,
   }
   competition.value.events.push(event)
@@ -47,7 +49,15 @@ function submitCompetition(e) {
   e.preventDefault()
   competitionStore.setCompetition(competition.value)
   competitionStore.saveCompetition().then(() => {
-    alert('Tävlingen har skapats!')
+    alert('Tävlingen har sparats!')
+  })
+}
+
+function setSessionDate(e) {
+  competition.value.sessions.forEach((session) => {
+    if (session.date < e.target.value) {
+      session.date = e.target.value
+    }
   })
 }
 </script>
@@ -61,19 +71,19 @@ function submitCompetition(e) {
       </label>
       <label>
         Namn:
-        <input type="text" v-model="competition.name" required />
+        <input type="text" v-model="competition.name" required/>
       </label>
       <label>
         Stad:
-        <input type="text" v-model="competition.city" required />
+        <input type="text" v-model="competition.city" required/>
       </label>
       <label>
         Land:
-        <input type="text" v-model="competition.country" required />
+        <input type="text" v-model="competition.country" required/>
       </label>
       <label>
         Datum:
-        <input type="date" v-model="competition.date" required />
+        <input type="date" v-model="competition.date" required @change="setSessionDate"/>
       </label>
       <label>
         Bassäng:
@@ -87,43 +97,39 @@ function submitCompetition(e) {
       <legend>Anmälningstider</legend>
       <label>
         Anmälan senast:
-        <input type="date" v-model="competition.lastEntryDate" required />
+        <input type="date" v-model="competition.lastEntry" required/>
       </label>
       <label>
         Tider uppnådda from:
-        <input type="date" v-model="competition.swimTimePeridStartDate" required />
+        <input type="date" v-model="competition.swimtimesFrom" required/>
       </label>
       <label>
         Tider uppnådda till:
-        <input type="date" v-model="competition.swimTimePeridEndDate" required />
+        <input type="date" v-model="competition.swimtimesTo" required/>
       </label>
       <label>
         Redigera anmälningstider:
-        <input type="checkbox" v-model="competition.allowRegisterSwimTimes" />
-      </label>
-      <label>
-        Endast tider i aktuell bassäng:
-        <input type="checkbox" v-model="competition.currentCourseOnly" />
+        <input type="checkbox" v-model="competition.editSwimtimes"/>
       </label>
     </fieldset>
     <fieldset id="admin">
       <legend>Admin</legend>
       <label>
         Administrera tävlingspass:
-        <input type="checkbox" v-model="competition.addSessions" />
+        <input type="checkbox" v-model="competition.editSessions"/>
       </label>
       <label>
         Administrera grenar:
-        <input type="checkbox" v-model="competition.addEvents" />
+        <input type="checkbox" v-model="competition.editEvents"/>
       </label>
     </fieldset>
     <fieldset id="sessions">
       <legend>Tävlingspass</legend>
       <SessionsList
         :sessions="competition.sessions"
-        :editSession="competition.addSessions ?? false"
+        :editSession="competition.editSessions ?? true"
       />
-      <button v-if="competition.addSessions ?? false" @click="addSession">Lägg till pass</button>
+      <button v-if="competition.editSessions ?? true" @click="addSession">Lägg till pass</button>
     </fieldset>
     <fieldset id="events">
       <legend>Grenar</legend>
@@ -135,7 +141,8 @@ function submitCompetition(e) {
       />
       <button v-if="competition.addEvents" @click="addEvent">Lägg till gren</button>
     </fieldset>
-    <button type="submit">Skapa Tävling</button>
+    <button v-if="competition.id===''" type="submit">Skapa Tävling</button>
+    <button v-else type="submit">Spara Tävling</button>
   </form>
 </template>
 
