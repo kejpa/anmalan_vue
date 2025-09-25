@@ -9,24 +9,23 @@ const props = defineProps(['competitionid'])
 
 const competitionStore = useCompetitionStore()
 const swimstyleStore = useSwimstyleStore()
-const events = ref([])
+const eventsList = ref([])
 
 const competition = ref({})
 
 onMounted(() => {
+    swimstyleStore.getAll().then(ss => {
+        eventsList.value = ss
+    })
+
     if (props.competitionid === '') {
         competition.value = new competitionStore.emptyCompetition()
-        return
     } else {
         competitionStore.getCompetition(props.competitionid)
             .then(data => {
                 competition.value = data
             })
     }
-        /*swimstyleStore.getAll()
-            .then(data => {
-                events.value = data
-            })*/
 })
 
 function addSession(e) {
@@ -47,17 +46,25 @@ function addEvent(e) {
     e.preventDefault()
     let event = {
         number: competition.value.events.length + 1,
+        eventid: 0,
         name: ' ',
         swimstyleid: 0,
+        swimstyle: [],
+        gender: 'M',
         utmanare: false,
         agegroups: [{agegroupid: 1, agemin: 0, agemax: 99}],
         session: 1,
+        round: 'TIM'
     }
     competition.value.events.push(event)
 }
 
 function submitCompetition(e) {
     e.preventDefault()
+    competition.value.events.forEach((event) => {
+        event.eventid = event.session * 1000 + event.number
+        event.swimstyle = swimstyleStore.getSwimstyle(event.swimstyleid)
+    })
     competitionStore.setCompetition(competition.value)
     competitionStore.saveCompetition().then(() => {
         alert('Tävlingen har sparats!')
@@ -148,10 +155,10 @@ function setSessionDate(e) {
             <EventsList
                 :events="competition.events"
                 :sessions="competition.sessions ?? null"
-                :eventsList="events.filter((e) => e.course === competition.course)"
-                :addEvents="competition.addEvents ?? false"
+                :eventsList="eventsList.filter((e) => e.course === competition.course)"
+                :addEvents="competition.editEvents ?? true"
             />
-            <button v-if="competition.addEvents" @click="addEvent">Lägg till gren</button>
+            <button v-if="competition.editEvents ?? true" @click="addEvent">Lägg till gren</button>
         </fieldset>
         <button v-if="competition.id===''" type="submit">Skapa Tävling</button>
         <button v-else type="submit">Spara Tävling</button>
