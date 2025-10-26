@@ -6,6 +6,7 @@ const useSwimmerStore = defineStore('swimmerStore', () => {
     const allSwimmers = ref([])
     const isLoading = ref(false)
     const hasLoaded = ref(false)
+    let loadedOnlyActive =null
     let loadPromise = null // används för att dela samma promise
 
 /*    const swimmer = ref({
@@ -27,6 +28,14 @@ const useSwimmerStore = defineStore('swimmerStore', () => {
     })
 */
     async function getAll(onlyActive=true) {
+        if(onlyActive !== loadedOnlyActive){
+            loadedOnlyActive = onlyActive
+            allSwimmers.value = []
+            hasLoaded.value = false
+            isLoading.value = false
+            loadPromise = null
+        }
+
         if (hasLoaded.value) return allSwimmers.value
         if (isLoading.value && loadPromise) return loadPromise
 
@@ -57,4 +66,4 @@ const useSwimmerStore = defineStore('swimmerStore', () => {
 
     return {getSwimmer, getAll}
 })
-export default useSwimmerStore()
+export default useSwimmerStore

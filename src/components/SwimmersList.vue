@@ -1,10 +1,11 @@
 <script setup>
-import {ref, watchEffect} from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import useCompetitionStore from "@/stores/competitionStore.js";
+import useSwimmerStore from "@/stores/swimmerStore.js";
 
 const props = defineProps(['competitionid'])
 const competitionStore = useCompetitionStore()
-//const swimmerStore = useSwimmerStore()
+const swimmerStore = useSwimmerStore()
 const competition = ref({})
 const allSwimmers = ref([])
 const filteredSwimmers = ref([])
@@ -13,62 +14,31 @@ const grupp = ref('Alla')
 const gren = ref('Alla')
 const activeOnly = ref(true)
 
+onMounted(() => {
+    getSwimmers()
+})
+
 watchEffect(() => {
     competitionStore.getCompetition(props.competitionid)
         .then(data => {
             competition.value = data
         })
-    allSwimmers.value = [{
-        id: 1,
-        firstname: 'Kjell',
-        lastname: 'Hansen',
-        gender: 'M',
-        yearBorn: 1966,
-        license: '66A301'
-    }, {
-        id: 2,
-        firstname: 'Kjell',
-        lastname: 'Hansen',
-        gender: 'M',
-        yearBorn: 1966,
-        license: '66A302'
-    }, {
-        id: 3,
-        firstname: 'Kjell',
-        lastname: 'Hansen',
-        gender: 'M',
-        yearBorn: 1966,
-        license: '66A303'
-    }, {
-        id: 11,
-        firstname: 'Anna',
-        lastname: 'Hansen',
-        gender: 'F',
-        yearBorn: 1968,
-        license: '68A301'
-    }, {
-        id: 2,
-        firstname: 'Anna',
-        lastname: 'Hansen',
-        gender: 'F',
-        yearBorn: 1968,
-        license: '68A302'
-    }, {
-        id: 3,
-        firstname: 'Nina',
-        lastname: 'Hansen',
-        gender: 'F',
-        yearBorn: 1972,
-        license: '72A503'
-    },]
-    filteredSwimmers.value = allSwimmers.value;
 })
+
+async function getSwimmers() {
+    allSwimmers.value = await swimmerStore.getAll(activeOnly.value)
+
+    allSwimmers.value.sort((a, b) => {
+        return a.firstname > b.firstname ? 1 : -1
+    })
+    filteredSwimmers.value = allSwimmers.value;
+}
 
 function filterGender() {
     if (gender.value === 'A') {
         filteredSwimmers.value = allSwimmers.value
     } else {
-        filteredSwimmers.value= allSwimmers.value.filter(swimmer => {
+        filteredSwimmers.value = allSwimmers.value.filter(swimmer => {
             return swimmer.gender === gender.value
         })
     }
@@ -99,7 +69,7 @@ function filterGender() {
     </label>
     <br>
     <label>
-        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly"/>
+        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly" @change="getSwimmers"/>
     </label>
     <ul>
         <li>Förnamn</li>
@@ -110,7 +80,7 @@ function filterGender() {
     <ul v-for="simmare in filteredSwimmers" :key="simmare.id">
         <li>{{ simmare.firstname }}</li>
         <li>{{ simmare.lastname }}</li>
-        <li>{{ simmare.yearBorn }}</li>
+        <li>{{ simmare.yearborn }}</li>
         <li>{{ simmare.license }}</li>
     </ul>
 </template>
