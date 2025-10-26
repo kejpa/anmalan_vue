@@ -3,6 +3,11 @@ import {ref} from 'vue'
 import APIServices from "@/services/APIServices.js";
 
 const useCompetitionStore = defineStore('competitionStore', () => {
+    const allCompetitions = ref([])
+    const isLoading = ref(false)
+    const hasLoaded = ref(false)
+    let loadPromise = null // används för att dela samma promise
+
     const competition = ref({
         id: '',
         name: '',
@@ -31,30 +36,33 @@ const useCompetitionStore = defineStore('competitionStore', () => {
         competition.value = newCompetition
     }
 
-    function getCompetition(id) {
-        return new Promise((resolve, reject) => {
-            APIServices.get('getCompetition/' + id)
-                .then((data) => {
-                    resolve(data)
-                })
-                .catch((error) => {
-                    console.error('Error fetching competition:', error)
-                    reject(error)
-                })
-        })
+    async function getCompetition(id) {
+        // Se till att all data finns innan vi letar
+        if (!hasLoaded.value) {
+            await getAll()
+        }
+
+        // Returnera posten (eller undefined om inte hittad)
+        return allCompetitions.value.find((comp) => comp.id === id);
     }
 
-    function getAll() {
-        return new Promise((resolve, reject) => {
-            APIServices.get('getCompetitions')
-                .then((data) => {
-                    resolve(data)
-                })
-                .catch((error) => {
-                    console.error('Error fetching competitions:', error)
-                    reject(error)
-                })
-        })
+    async function getAll() {
+        if (hasLoaded.value) return allCompetitions.value
+        if (isLoading.value && loadPromise) return loadPromise
+
+        isLoading.value = true
+        loadPromise = (async () => {
+            try {
+                const data = await APIServices.get(`getCompetitions`)
+                allCompetitions.value = data
+                hasLoaded.value = true
+            } finally {
+                isLoading.value = false
+            }
+            return allCompetitions.value
+        })()
+
+        return loadPromise
     }
 
     function saveCompetition() {
@@ -72,6 +80,7 @@ const useCompetitionStore = defineStore('competitionStore', () => {
                 APIServices.post('saveCompetition', competition.value)
                     .then((data) => {
                         competition.value.id = data.id
+                        allCompetitions.value = allCompetitions.value.push(competition.value)
                         resolve(true)
                     })
                     .catch((error) => {
