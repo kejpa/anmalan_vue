@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CompetitionsView from "@/views/CompetitionsView.vue";
 import EditCompetitionView from "@/views/EditCompetitionView.vue";
+import EntriesView from "@/views/EntriesView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,12 @@ const router = createRouter({
             path: '/tavlingar/:id',
             name: 'competition',
             component: EditCompetitionView,
+            props: true,
+        },
+        {
+            path: '/anmalningar/:id',
+            name: 'entries',
+            component: EntriesView,
             props: true,
         },
         {
