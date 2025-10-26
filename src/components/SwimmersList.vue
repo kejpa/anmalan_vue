@@ -2,6 +2,7 @@
 import {onMounted, ref, watchEffect} from "vue";
 import useCompetitionStore from "@/stores/competitionStore.js";
 import useSwimmerStore from "@/stores/swimmerStore.js";
+import APIServices from "@/services/APIServices.ts";
 
 const props = defineProps(['competitionid'])
 const competitionStore = useCompetitionStore()
@@ -13,9 +14,17 @@ const gender = ref('A')
 const grupp = ref('Alla')
 const gren = ref('Alla')
 const activeOnly = ref(true)
+const groups = ref([])
 
 onMounted(() => {
     getSwimmers()
+    APIServices.get('getActiveGroups')
+        .then(data => {
+            groups.value = data
+            groups.value.sort((a, b) => {
+                return a.name > b.name ? 1 : -1
+            })
+        })
 })
 
 watchEffect(() => {
@@ -43,6 +52,21 @@ function filterGender() {
         })
     }
 }
+
+function filterGroup() {
+    if (grupp.value === 'Alla') {
+        filteredSwimmers.value = allSwimmers.value
+    } else {
+        filteredSwimmers.value = allSwimmers.value.filter(swimmer => {
+            for (const g of swimmer.groups) {
+                if (g.id === grupp.value) {
+                    return true
+                }
+            }
+            return false
+        })
+    }
+}
 </script>
 
 <template>
@@ -57,8 +81,12 @@ function filterGender() {
     </label>
     <label>
         Grupp:
-        <select v-model="grupp">
+        <select v-model="grupp" @change="filterGroup">
             <option>Alla</option>
+            <option v-for="group in groups" :key="group.id" :value="group.id">{{
+                    group.name
+                }}
+            </option>
         </select>
     </label>
     <label>
@@ -71,7 +99,7 @@ function filterGender() {
     <label>
         Endast aktiva simmare: <input type="checkbox" v-model="activeOnly" @change="getSwimmers"/>
     </label>
-    <ul>
+    <ul class="header">
         <li>Förnamn</li>
         <li>Efternamn</li>
         <li>Född</li>
@@ -102,7 +130,7 @@ ul {
     background-color: #eee;
 }
 
-ul:first-child li {
+.header li {
     font-weight: bold;
 }
 
