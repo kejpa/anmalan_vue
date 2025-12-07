@@ -15,6 +15,7 @@ const grupp = ref('Alla')
 const gren = ref('Alla')
 const activeOnly = ref(true)
 const groups = ref([])
+const events = ref([])
 
 onMounted(() => {
     getSwimmers()
@@ -31,6 +32,7 @@ watchEffect(() => {
     competitionStore.getCompetition(props.competitionid)
         .then(data => {
             competition.value = data
+            events.value = data.events
         })
 })
 
@@ -43,21 +45,16 @@ async function getSwimmers() {
     filteredSwimmers.value = allSwimmers.value;
 }
 
-function filterGender() {
-    if (gender.value === 'A') {
-        filteredSwimmers.value = allSwimmers.value
-    } else {
+function filterSwimmers() {
+    filteredSwimmers.value = allSwimmers.value
+    if (gender.value !== 'A') {
         filteredSwimmers.value = allSwimmers.value.filter(swimmer => {
             return swimmer.gender === gender.value
         })
     }
-}
 
-function filterGroup() {
-    if (grupp.value === 'Alla') {
-        filteredSwimmers.value = allSwimmers.value
-    } else {
-        filteredSwimmers.value = allSwimmers.value.filter(swimmer => {
+    if (grupp.value !== 'Alla') {
+        filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
             for (const g of swimmer.groups) {
                 if (g.id === grupp.value) {
                     return true
@@ -73,7 +70,7 @@ function filterGroup() {
     <h3>Anmälningsbara simmare</h3>
     <label>
         Klass:
-        <select v-model="gender" @change="filterGender">
+        <select v-model="gender" @change="filterSwimmers">
             <option value="A">Alla</option>
             <option value="M">Herrar</option>
             <option value="F">Damer</option>
@@ -81,7 +78,7 @@ function filterGroup() {
     </label>
     <label>
         Grupp:
-        <select v-model="grupp" @change="filterGroup">
+        <select v-model="grupp" @change="filterSwimmers">
             <option>Alla</option>
             <option v-for="group in groups" :key="group.id" :value="group.id">{{
                     group.name
@@ -89,10 +86,14 @@ function filterGroup() {
             </option>
         </select>
     </label>
-    <label>
+    <label style="display: none">
         Gren:
-        <select v-model="gren">
+        <select v-model="gren" @change="filterSwimmers">
             <option>Alla</option>
+            <option v-for="event in events" :key="event.eventid" :value="event.eventid">{{
+                    `${event.number}. ${event.name}`
+                }}
+            </option>
         </select>
     </label>
     <br>
