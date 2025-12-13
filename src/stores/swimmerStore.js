@@ -64,6 +64,10 @@ const useSwimmerStore = defineStore('swimmerStore', () => {
         return allSwimmers.value.find((swimmer) => swimmer.id === id);
     }
 
-    return {getSwimmer, getAll}
+    async function getResults(competitionId, swimmerId) {
+        return APIServices.get(`getResults?competitionId=${competitionId}&swimmerId=${swimmerId}`)
+    }
+
+    return {getSwimmer, getAll, getResults}
 })
 export default useSwimmerStore

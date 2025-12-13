@@ -1,13 +1,15 @@
 <script setup>
 import {onMounted, ref, watchEffect} from "vue";
-import useCompetitionStore from "@/stores/competitionStore.js";
+//import useCompetitionStore from "@/stores/competitionStore.js";
 import useSwimmerStore from "@/stores/swimmerStore.js";
 import APIServices from "@/services/APIServices.ts";
 
+/*
 const props = defineProps(['competitionid'])
 const competitionStore = useCompetitionStore()
-const swimmerStore = useSwimmerStore()
 const competition = ref({})
+*/
+const swimmerStore = useSwimmerStore()
 const allSwimmers = ref([])
 const filteredSwimmers = ref([])
 const gender = ref('A')
@@ -16,6 +18,7 @@ const gren = ref('Alla')
 const activeOnly = ref(true)
 const groups = ref([])
 const events = ref([])
+const emit = defineEmits(['select'])
 
 onMounted(() => {
     getSwimmers()
@@ -28,6 +31,7 @@ onMounted(() => {
         })
 })
 
+/*
 watchEffect(() => {
     competitionStore.getCompetition(props.competitionid)
         .then(data => {
@@ -35,6 +39,7 @@ watchEffect(() => {
             events.value = data.events
         })
 })
+*/
 
 async function getSwimmers() {
     allSwimmers.value = await swimmerStore.getAll(activeOnly.value)
@@ -63,6 +68,10 @@ function filterSwimmers() {
             return false
         })
     }
+}
+
+function selectSwimmer(swimmer) {
+    emit('select', swimmer)
 }
 </script>
 
@@ -106,7 +115,7 @@ function filterSwimmers() {
         <li>Född</li>
         <li>Licens</li>
     </ul>
-    <ul v-for="simmare in filteredSwimmers" :key="simmare.id">
+    <ul v-for="simmare in filteredSwimmers" :key="simmare.id" @click="selectSwimmer(simmare)">
         <li>{{ simmare.firstname }}</li>
         <li>{{ simmare.lastname }}</li>
         <li>{{ simmare.yearborn }}</li>
@@ -129,6 +138,7 @@ ul {
     grid-template-columns: 2fr 2fr 1fr 1fr;
     list-style: none;
     background-color: #eee;
+    cursor: pointer;
 }
 
 .header li {
