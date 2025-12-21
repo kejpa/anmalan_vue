@@ -34,7 +34,7 @@ watch(() => props.swimmer, async (newSwimmer) => {
         if (!newSwimmer) return
 
         try {
-            entries.value=entriesStore.getEntries(newSwimmer.id)
+            entries.value=await entriesStore.getEntries(newSwimmer.id)
             const data = await swimmerStore.getResults(props.competitionId, newSwimmer.id)
             for (let event of competition.value.events) {
                 let time = data.find(itm => itm.eventid === event.eventid)
@@ -50,7 +50,7 @@ watch(() => props.swimmer, async (newSwimmer) => {
             }
         } catch (err) {
             console.error("Kunde inte hämta resultat för simmare:", err)
-            swimmerEvents.value = null
+            swimmerEvents.value = []
         }
     },
     {immediate: true} // Kör direkt vid mount
@@ -66,13 +66,13 @@ function closeModal() {
 
 function addEntry(eventid, entryInfo) {
     const entry = {}
-    entry.competitionId=props.competitionId
+    entry.competitionid=props.competitionId
     entry.swimmerid = props.swimmer.id
     entry.eventid = eventid
     entry.info = entryInfo
 
-    // Lägg till entry om eventid inte finns eller bassängen är olika
     entries.value.push(entry)
+    entriesStore.saveEntry(entry)
     swimmerEvents.value.find(itm => itm.event.eventid === eventid).hasSwimmerEntry = true;
 
     // Sortera entries efter grennummer
@@ -83,6 +83,7 @@ function addEntry(eventid, entryInfo) {
 
 function removeEntry(entry){
     entries.value=entries.value.filter(itm => itm !== entry);
+    entriesStore.removeEntry(entry.id);
     swimmerEvents.value.find(itm => itm.event.eventid === entry.eventid).hasSwimmerEntry = false;
 }
 

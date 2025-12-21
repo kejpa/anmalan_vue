@@ -30,7 +30,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
         }
 
         // Returnera posterna
-        return allEntries.value.filter((swimmer) => swimmer.id === swimmerId);
+        return allEntries.value.filter((swimmer) => swimmer.id === swimmerId) ?? [];
     }
 
     async function getAll(competitionId) {
@@ -41,6 +41,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
         loadPromise = (async () => {
             try {
                 const data = await APIServices.get(`getEntries?competitionId=${competitionId}`)
+                console.log("entries data:", data, Array.isArray(data))
                 allEntries.value = data
                 hasLoaded.value = true
             } catch (error) {
@@ -60,7 +61,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
             if (entry.id) {
                 APIServices.put('saveEntry', entry)
                     .then(() => {
-                        resolve(true)
+                        resolve(entry)
                     })
                     .catch((error) => {
                         console.error('Error updating entry:', error)
@@ -70,8 +71,8 @@ const useEntriesStore = defineStore('entriesStore', () => {
                 APIServices.post('saveEntry', entry)
                     .then((data) => {
                         entry.id = data.id
-                        allEntries.value = allEntries.value.push(entry)
-                        resolve(true)
+                        allEntries.value.push(entry)
+                        resolve(entry)
                     })
                     .catch((error) => {
                         console.error('Error creating entry:', error)
@@ -83,7 +84,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
 
     function removeEntry(entryId) {
         return new Promise((resolve, reject) => {
-            APIServices.post('deleteEntry', entryId)
+            APIServices.delete('deleteEntry?id=' + entryId)
                 .then(() => {
                     allEntries.value = allEntries.value.filter(e => e.id !== entryId)
                     resolve(true)
