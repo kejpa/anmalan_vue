@@ -91,6 +91,10 @@ const useCompetitionStore = defineStore('competitionStore', () => {
         })
     }
 
-    return {setCompetition, getCompetition, saveCompetition, getAll}
+    function getEvent(evId) {
+        return competition.value.events.find((ev) => ev.eventid === evId) ??''
+    }
+
+    return {setCompetition, getCompetition, saveCompetition, getAll, getEvent}
 })
 export default useCompetitionStore

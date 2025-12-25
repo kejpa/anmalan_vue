@@ -139,6 +139,7 @@ ul {
     list-style: none;
     background-color: #eee;
     cursor: pointer;
+    padding-left: .5em;
 }
 
 .header li {

@@ -13,13 +13,12 @@ const useEntriesStore = defineStore('entriesStore', () => {
           swimmerId: '',
           competitionId: '',
           eventId: '',
-          info: [{
+          info: {
               time: '',
               city: '',
               date: '',
               course: 'SCM',
-          }
-          ],
+          },
       })
   */
 
