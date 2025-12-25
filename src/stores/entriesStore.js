@@ -29,7 +29,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
         }
 
         // Returnera posterna
-        return allEntries.value.filter((swimmer) => swimmer.id === swimmerId) ?? [];
+        return allEntries.value.filter((entry) => entry.swimmerid === swimmerId) ?? [];
     }
 
     async function getAll(competitionId) {
@@ -40,7 +40,6 @@ const useEntriesStore = defineStore('entriesStore', () => {
         loadPromise = (async () => {
             try {
                 const data = await APIServices.get(`getEntries?competitionId=${competitionId}`)
-                console.log("entries data:", data, Array.isArray(data))
                 allEntries.value = data
                 hasLoaded.value = true
             } catch (error) {

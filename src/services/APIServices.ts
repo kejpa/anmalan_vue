@@ -25,7 +25,7 @@ export default new (class APIService {
         method: 'GET',
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.ok) {
             resolve(response.json())
           } else if (response.status === 401) {
             fetch(this.apiBase + 'refresh')
@@ -78,7 +78,7 @@ export default new (class APIService {
         //        credentials: 'include'
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.ok) {
             resolve(response.headers)
           } else {
             throw response.text()
@@ -107,7 +107,7 @@ export default new (class APIService {
         body: JSON.stringify(object),
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.ok) {
             resolve(response.json())
           } else if (response.status === 401) {
             fetch(this.apiBase + 'refresh')
@@ -161,7 +161,7 @@ export default new (class APIService {
         body: JSON.stringify(object),
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.ok) {
             resolve(response.json())
           } else if (response.status === 401) {
             fetch(this.apiBase + 'refresh')
@@ -212,7 +212,7 @@ export default new (class APIService {
         headers: { Token: 'Bearer ' + jwtToken },
       })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.ok) {
             resolve(response.json())
           } else if (response.status === 401) {
             fetch(this.apiBase + 'refresh')

@@ -45,6 +45,9 @@ watch(() => props.swimmer, async (newSwimmer) => {
                     if (time.guldTid) {
                         se.guldtid = time.guldTid.swimtime
                     }
+                    se.hasSwimmerEntry = entries.value.some(itm => {
+                       return itm.swimmerid===newSwimmer.id && itm.eventid === event.eventid
+                    })
                     swimmerEvents.value.push(se)
                 }
             }
