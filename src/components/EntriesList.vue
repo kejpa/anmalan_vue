@@ -4,32 +4,51 @@ import remove from "@/assets/images/delete.png";
 import useSwimmerStore from "@/stores/swimmerStore.js";
 import useCompetitionStore from "@/stores/competitionStore.js";
 import useEntriesStore from "@/stores/entriesStore.js";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
+import {storeToRefs} from "pinia";
 
 const props = defineProps(['competitionid']);
 const competition = ref();
-const entries = ref();
-const swimmers = ref()
+const {allEntries} = storeToRefs(useEntriesStore());
+const {allSwimmers} = storeToRefs(useSwimmerStore());
 
 onMounted(async () => {
-    swimmers.value = await useSwimmerStore().getAll();
     competition.value = await useCompetitionStore().getCompetition(props.competitionid);
-    entries.value = await useEntriesStore().getAll(props.competitionid);
+    sortEntries();
+})
+watch(
+    allEntries,
+    (entries) => {
+        console.log("Entries loaded")
+        sortEntries();
+    },
+    { deep: true }
+)
+watch(
+    allSwimmers,
+    (swimmers) => {
+        console.log("Swimmers loaded")
+        sortEntries();
+    },
+    { deep: true }
+)
 
-    entries.value.sort((a, b) => {
-        if (a.swimmerid !== b.swimmerid) return getSwimmer(a.swimmerid).firstname < getSwimmer(b.swimmerid).firstname ? -1 : 1;
+function sortEntries() {
+    if(!competition.value || !allSwimmers.value || !allEntries.value) return;
+    allEntries.value.sort((a, b) => {
+        if (a.swimmerid !== b.swimmerid) return getSwimmer(a.swimmerid)?.firstname > getSwimmer(b.swimmerid)?.firstname ? 1 : -1;
         return competition.value.events.find(e => e.eventid === a.eventid).number - competition.value.events.find(e => e.eventid === b.eventid).number;
 
     })
-})
-
+}
 function getSwimmer(swimmerid) {
-    let swimmer = swimmers.value.find(s => s.id === swimmerid)
+    if (!allSwimmers) return;
+    let swimmer = allSwimmers.value.find(s => s.id === swimmerid)
     return swimmer;
 }
 
 function removeEntry(entry) {
-    entries.value = entries.value.filter(itm => itm !== entry);
+//    allEntries.value = allEntries.value.filter(itm => itm !== entry);
     useEntriesStore().removeEntry(entry.id);
 }
 </script>
@@ -43,12 +62,12 @@ function removeEntry(entry) {
         <li>Tid</li>
         <li>&nbsp;</li>
     </ul>
-    <ul v-for="entry in entries" :key="entry.id">
+    <ul v-for="entry in allEntries" :key="entry.id">
         <li>{{
-                `${getSwimmer(entry.swimmerid).firstname} ${getSwimmer(entry.swimmerid).lastname}`
+                `${getSwimmer(entry.swimmerid)?.firstname} ${getSwimmer(entry.swimmerid)?.lastname}`
             }}
         </li>
-        <li>{{ getSwimmer(entry.swimmerid).yearborn }}</li>
+        <li>{{ getSwimmer(entry.swimmerid)?.yearborn }}</li>
         <li>{{
                 `${competition.events.find(e => e.eventid === entry.eventid).number} ${competition.events.find(e => e.eventid === entry.eventid).name}`
             }}

@@ -1,16 +1,11 @@
 <script setup>
-import {onMounted, ref, watchEffect} from "vue";
-//import useCompetitionStore from "@/stores/competitionStore.js";
+import {onMounted, ref, watch} from "vue";
 import useSwimmerStore from "@/stores/swimmerStore.js";
 import APIServices from "@/services/APIServices.ts";
+import {storeToRefs} from "pinia";
 
-/*
-const props = defineProps(['competitionid'])
-const competitionStore = useCompetitionStore()
-const competition = ref({})
-*/
 const swimmerStore = useSwimmerStore()
-const allSwimmers = ref([])
+const {allSwimmers} = storeToRefs(swimmerStore)
 const filteredSwimmers = ref([])
 const gender = ref('A')
 const grupp = ref('Alla')
@@ -21,39 +16,36 @@ const events = ref([])
 const emit = defineEmits(['select'])
 
 onMounted(() => {
-    getSwimmers()
+    swimmerStore.getAllSwimmers()
     APIServices.get('getActiveGroups')
         .then(data => {
             groups.value = data
             groups.value.sort((a, b) => {
                 return a.name > b.name ? 1 : -1
             })
+            filterSwimmers()
         })
 })
 
-/*
-watchEffect(() => {
-    competitionStore.getCompetition(props.competitionid)
-        .then(data => {
-            competition.value = data
-            events.value = data.events
-        })
-})
-*/
+watch(
+    allSwimmers,
+    (swimmers) => {
+        filterSwimmers();
+    },
+    {deep: true}
+)
 
-async function getSwimmers() {
-    allSwimmers.value = await swimmerStore.getAll(activeOnly.value)
 
-    allSwimmers.value.sort((a, b) => {
-        return a.firstname > b.firstname ? 1 : -1
-    })
-    filteredSwimmers.value = allSwimmers.value;
+function sortedSwimmers() {
+    return [...filteredSwimmers.value].sort((a, b) =>
+        a.firstname.localeCompare(b.firstname)
+    )
 }
 
 function filterSwimmers() {
     filteredSwimmers.value = allSwimmers.value
     if (gender.value !== 'A') {
-        filteredSwimmers.value = allSwimmers.value.filter(swimmer => {
+        filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
             return swimmer.gender === gender.value
         })
     }
@@ -115,7 +107,7 @@ function selectSwimmer(swimmer) {
         <li>Född</li>
         <li>Licens</li>
     </ul>
-    <ul v-for="simmare in filteredSwimmers" :key="simmare.id" @click="selectSwimmer(simmare)">
+    <ul v-for="simmare in sortedSwimmers()" :key="simmare.id" @click="selectSwimmer(simmare)">
         <li>{{ simmare.firstname }}</li>
         <li>{{ simmare.lastname }}</li>
         <li>{{ simmare.yearborn }}</li>

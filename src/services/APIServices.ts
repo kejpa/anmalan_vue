@@ -213,7 +213,7 @@ export default new (class APIService {
       })
         .then((response) => {
           if (response.ok) {
-            resolve(response.json())
+            resolve()
           } else if (response.status === 401) {
             fetch(this.apiBase + 'refresh')
               .then((response) => {
@@ -231,7 +231,7 @@ export default new (class APIService {
                   headers: { Token: 'Bearer ' + jwtToken },
                 }).then((response) => {
                   if (response.ok) {
-                    resolve(response.json())
+                    resolve()
                   } else {
                     throw response.text()
                   }

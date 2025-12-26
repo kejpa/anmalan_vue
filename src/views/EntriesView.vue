@@ -10,13 +10,11 @@ import EntriesList from "@/components/EntriesList.vue";
 
 const route = useRoute()
 const entriesStore = useEntriesStore()
-const entries = ref([])
 const showEntries = ref(false)
 const swimmer = ref({})
 
 onMounted(async () => {
-    entries.value = await entriesStore.getAll(route.params.id)
-    console.log("entries::", entries.value)
+    entriesStore.getAllForCompetition(route.params.id)
 })
 
 function openModal(swimmerInfo) {

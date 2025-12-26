@@ -25,14 +25,14 @@ const useEntriesStore = defineStore('entriesStore', () => {
     async function getEntries(swimmerId) {
         // Se till att all data finns innan vi letar
         if (!hasLoaded.value) {
-            await getAll()
+            await getAllForCompetition()
         }
 
         // Returnera posterna
         return allEntries.value.filter((entry) => entry.swimmerid === swimmerId) ?? [];
     }
 
-    async function getAll(competitionId) {
+    async function getAllForCompetition(competitionId) {
         if (hasLoaded.value) return allEntries.value
         if (isLoading.value && loadPromise) return loadPromise
 
@@ -94,6 +94,6 @@ const useEntriesStore = defineStore('entriesStore', () => {
         })
     }
 
-    return {saveEntry, getAll, getEntries, removeEntry}
+    return {saveEntry, getAllForCompetition, getEntries, removeEntry, allEntries}
 })
 export default useEntriesStore
