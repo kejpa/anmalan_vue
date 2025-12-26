@@ -11,36 +11,51 @@ const props = defineProps(['competitionid']);
 const competition = ref();
 const {allEntries} = storeToRefs(useEntriesStore());
 const {allSwimmers} = storeToRefs(useSwimmerStore());
+const sortOrder = ref('firstname asc');
 
 onMounted(async () => {
     competition.value = await useCompetitionStore().getCompetition(props.competitionid);
-    sortEntries();
 })
 watch(
     allEntries,
     (entries) => {
         console.log("Entries loaded")
-        sortEntries();
     },
-    { deep: true }
+    {deep: true}
 )
 watch(
     allSwimmers,
     (swimmers) => {
         console.log("Swimmers loaded")
-        sortEntries();
     },
-    { deep: true }
+    {deep: true}
 )
 
+function sortedEntries() {
+    let [field, order] = sortOrder.value.split(" ")
+    return [...allEntries.value].sort((a, b) => {
+        let o = order === 'asc' ? 1 : -1;
+        if (field === 'firstname') {
+            if (a.swimmerid !== b.swimmerid) return getSwimmer(a.swimmerid)?.firstname > getSwimmer(b.swimmerid)?.firstname ? o : -o;
+            return competition.value.events.find(e => e.eventid === a.eventid).number - competition.value.events.find(e => e.eventid === b.eventid).number;
+        } else {
+            if (competition.value.events.find(e => e.eventid === a.eventid).number !== competition.value.events.find(e => e.eventid === b.eventid).number) return competition.value.events.find(e => e.eventid === a.eventid).number * o - competition.value.events.find(e => e.eventid === b.eventid).number * o;
+            return getSwimmer(a.swimmerid)?.firstname > getSwimmer(b.swimmerid)?.firstname ? 1 : -1;
+        }
+    })
+}
+
+/*
 function sortEntries() {
-    if(!competition.value || !allSwimmers.value || !allEntries.value) return;
+    if (!competition.value || !allSwimmers.value || !allEntries.value) return;
     allEntries.value.sort((a, b) => {
         if (a.swimmerid !== b.swimmerid) return getSwimmer(a.swimmerid)?.firstname > getSwimmer(b.swimmerid)?.firstname ? 1 : -1;
         return competition.value.events.find(e => e.eventid === a.eventid).number - competition.value.events.find(e => e.eventid === b.eventid).number;
 
     })
 }
+ */
+
 function getSwimmer(swimmerid) {
     if (!allSwimmers) return;
     let swimmer = allSwimmers.value.find(s => s.id === swimmerid)
@@ -51,18 +66,30 @@ function removeEntry(entry) {
 //    allEntries.value = allEntries.value.filter(itm => itm !== entry);
     useEntriesStore().removeEntry(entry.id);
 }
+
+function sortList(way) {
+    let [field, order] = sortOrder.value.split(" ")
+    if (way === field) {
+        order = order === 'asc' ? 'desc' : 'asc';
+    } else {
+        field = way
+        order = 'asc'
+    }
+
+    sortOrder.value = `${field} ${order}`
+}
 </script>
 
 <template>
 
     <ul class="header">
-        <li>Namn</li>
+        <li class="sort" @click="sortList('firstname')">Namn</li>
         <li>Född</li>
-        <li>Gren</li>
+        <li class="sort" @click="sortList('event')">Gren</li>
         <li>Tid</li>
         <li>&nbsp;</li>
     </ul>
-    <ul v-for="entry in allEntries" :key="entry.id">
+    <ul v-for="entry in sortedEntries()" :key="entry.id">
         <li>{{
                 `${getSwimmer(entry.swimmerid)?.firstname} ${getSwimmer(entry.swimmerid)?.lastname}`
             }}
@@ -84,12 +111,15 @@ ul {
     grid-template-columns: 4fr 1fr 3fr 3fr 1.2em;
     list-style: none;
     background-color: #eee;
-    cursor: pointer;
     padding-left: .5em;
 }
 
 .header li {
     font-weight: bold;
+}
+
+li.sort {
+    cursor: pointer;
 }
 
 ul:nth-child(even) {

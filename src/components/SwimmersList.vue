@@ -14,6 +14,7 @@ const activeOnly = ref(true)
 const groups = ref([])
 const events = ref([])
 const emit = defineEmits(['select'])
+const sortOrder = ref('firstname asc')
 
 onMounted(() => {
     swimmerStore.getAllSwimmers()
@@ -37,14 +38,16 @@ watch(
 
 
 function sortedSwimmers() {
-    return [...filteredSwimmers.value].sort((a, b) =>
-        a.firstname.localeCompare(b.firstname)
-    )
+    let [field, order] = sortOrder.value.split(" ")
+    return [...filteredSwimmers.value].sort((a, b) => {
+        let o = order === 'asc' ? 1 : -1;
+        return a[field] > b[field] ? o : -o;
+    })
 }
 
 function filterSwimmers() {
     filteredSwimmers.value = allSwimmers.value
-    if(activeOnly.value)     filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
+    if (activeOnly.value) filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
         return swimmer.active === activeOnly.value
     })
     if (gender.value !== 'A') {
@@ -67,6 +70,18 @@ function filterSwimmers() {
 
 function selectSwimmer(swimmer) {
     emit('select', swimmer)
+}
+
+function sortList(way) {
+    let [field, order] = sortOrder.value.split(" ")
+    if (way === field) {
+        order = order === 'asc' ? 'desc' : 'asc';
+    } else {
+        field = way
+        order = 'asc'
+    }
+
+    sortOrder.value = `${field} ${order}`
 }
 </script>
 
@@ -102,12 +117,13 @@ function selectSwimmer(swimmer) {
     </label>
     <br>
     <label>
-        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly" @change="filterSwimmers"/>
+        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly"
+                                      @change="filterSwimmers"/>
     </label>
     <ul class="header">
-        <li>Förnamn</li>
-        <li>Efternamn</li>
-        <li>Född</li>
+        <li class="sort" @click="sortList('firstname')">Förnamn</li>
+        <li class="sort" @click="sortList('lastname')">Efternamn</li>
+        <li class="sort" @click="sortList('yearborn')">Född</li>
         <li>Licens</li>
     </ul>
     <ul v-for="simmare in sortedSwimmers()" :key="simmare.id" @click="selectSwimmer(simmare)">
@@ -133,12 +149,16 @@ ul {
     grid-template-columns: 2fr 2fr 1fr 1fr;
     list-style: none;
     background-color: #eee;
-    cursor: pointer;
     padding-left: .5em;
 }
 
 .header li {
     font-weight: bold;
+    cursor: initial;
+}
+
+li.sort {
+    cursor: pointer;
 }
 
 ul:nth-child(even) {
