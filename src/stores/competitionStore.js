@@ -46,7 +46,7 @@ const useCompetitionStore = defineStore('competitionStore', () => {
         return allCompetitions.value.find((comp) => comp.id === id);
     }
 
-    async function getAll() {
+    async function getAllCompetitions() {
         if (hasLoaded.value) return allCompetitions.value
         if (isLoading.value && loadPromise) return loadPromise
 
@@ -91,10 +91,32 @@ const useCompetitionStore = defineStore('competitionStore', () => {
         })
     }
 
-    function getEvent(evId) {
-        return competition.value.events.find((ev) => ev.eventid === evId) ??''
+    function removeCompetition(id) {
+        return new Promise((resolve, reject) => {
+            APIServices.delete('deleteCompetition?id=' + id)
+                .then(() => {
+                    allCompetitions.value = allCompetitions.value.filter(e => e.id !== id)
+                    resolve(true)
+                })
+                .catch((error) => {
+                    console.error('Error removing entry:', error)
+                    reject(error)
+                })
+        })
     }
 
-    return {setCompetition, getCompetition, saveCompetition, getAll, getEvent}
+    /*
+        function getEvent(evId) {
+            return competition.value.events.find((ev) => ev.eventid === evId) ??''
+        }
+    */
+    return {
+        setCompetition,
+        getCompetition,
+        saveCompetition,
+        getAllCompetitions,
+        removeCompetition,
+        allCompetitions
+    }
 })
 export default useCompetitionStore
