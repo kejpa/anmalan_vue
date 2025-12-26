@@ -44,6 +44,9 @@ function sortedSwimmers() {
 
 function filterSwimmers() {
     filteredSwimmers.value = allSwimmers.value
+    if(activeOnly.value)     filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
+        return swimmer.active === activeOnly.value
+    })
     if (gender.value !== 'A') {
         filteredSwimmers.value = filteredSwimmers.value.filter(swimmer => {
             return swimmer.gender === gender.value
@@ -99,7 +102,7 @@ function selectSwimmer(swimmer) {
     </label>
     <br>
     <label>
-        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly" @change="getSwimmers"/>
+        Endast aktiva simmare: <input type="checkbox" v-model="activeOnly" @change="filterSwimmers"/>
     </label>
     <ul class="header">
         <li>Förnamn</li>
