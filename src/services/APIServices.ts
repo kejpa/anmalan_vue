@@ -247,4 +247,59 @@ export default new (class APIService {
         })
     })
   }
+
+    /**
+     * Anropa API:et med GET-parametrar för att hämta en blob
+     * @param {*} params Query-parametrar för anropet
+     * @returns Promise-objekt
+     */
+    getBlob(params: string): Promise<unknown> {
+        let jwtToken = getAccessToken()
+        return new Promise((resolve, reject) => {
+            // Hämta data från endpointen
+            fetch(this.apiBase + params, {
+                headers: { Token: 'Bearer ' + jwtToken },
+                method: 'GET',
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        resolve(response.blob())
+                    } else if (response.status === 401) {
+                        fetch(this.apiBase + 'refresh')
+                            .then((second) => {
+                                if (second.ok) {
+                                    return second.json()
+                                } else {
+                                    throw second.text()
+                                }
+                            })
+                            .then((data) => {
+                                jwtToken = data.jwt
+                                storeAccessToken(jwtToken)
+                                fetch(this.apiBase + params, {
+                                    headers: { Token: 'Bearer ' + jwtToken },
+                                    method: 'GET',
+                                }).then((response) => {
+                                    if (response.ok) {
+                                        resolve(response.blob())
+                                    } else {
+                                        throw response.text()
+                                    }
+                                })
+                            })
+                            .catch((err) => {
+                                // Refreshtoken saknas
+                                reject(err)
+                            })
+                    } else {
+                        throw response.text()
+                    }
+                })
+                .catch((err) => {
+                    // Något gick fel
+                    reject(err)
+                })
+        })
+    }
+
 })()

@@ -6,6 +6,7 @@ import enter from '@/assets/images/enter.png'
 import remove from "@/assets/images/delete.png"
 import download from "@/assets/images/download.png"
 import {storeToRefs} from "pinia";
+import APIServices from "@/services/APIServices.ts";
 
 const competitionStore = useCompetitionStore()
 const {allCompetitions} = storeToRefs(competitionStore)
@@ -14,6 +15,19 @@ onMounted(() => {
     competitionStore.getAllCompetitions()
 })
 
+function downloadEntries(id) {
+    APIServices.getBlob(`entriesFile?id=${id}`)
+        .then((blob) => {
+            const fileUrl=window.URL.createObjectURL(blob)
+            const aTagg=document.createElement('a')
+            aTagg.href=fileUrl
+            aTagg.download='anmalan.lef'
+            document.body.appendChild(aTagg)
+            aTagg.click()
+            document.body.removeChild(aTagg)
+            window.URL.revokeObjectURL(fileUrl)
+        })
+}
 function removeCompetition(id) {
     competitionStore.removeCompetition(id)
 }
@@ -43,7 +57,7 @@ function sortedCompetitions() {
             {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
         </li>
         <li>
-            <img :src="download" height="16" title="Download">
+            <img :src="download" height="16" title="Download" @click="downloadEntries(competition.id)">
         </li>
         <li>
             <img :src="remove" height="16" title="Radera" @click="removeCompetition(competition.id)">
