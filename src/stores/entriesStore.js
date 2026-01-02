@@ -40,7 +40,10 @@ const useEntriesStore = defineStore('entriesStore', () => {
         loadPromise = (async () => {
             try {
                 const data = await APIServices.get(`getEntries?competitionId=${competitionId}`)
-                allEntries.value = data
+                allEntries.value = data.map(entry => {
+                    entry.info.swimtime=entry.info.swimtime.substring(3)
+                    return entry
+                })
                 hasLoaded.value = true
             } catch (error) {
                 console.error('Error fetching entries:', error)
