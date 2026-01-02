@@ -39,7 +39,7 @@ const useCompetitionStore = defineStore('competitionStore', () => {
     async function getCompetition(id) {
         // Se till att all data finns innan vi letar
         if (!hasLoaded.value) {
-            await getAll()
+            await getAllCompetitions()
         }
 
         // Returnera posten (eller undefined om inte hittad)
