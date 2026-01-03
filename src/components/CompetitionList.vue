@@ -43,11 +43,12 @@ function sortedCompetitions() {
 <template>
     <h1>Tävlingar</h1>
     <ul v-for="competition in sortedCompetitions()" :key="competition.id">
-        <li>
+        <li v-if="competition.lastEntry > (new Date()).toLocaleDateString()">
             <router-link :to="'/anmalningar/' + competition.id">
                 <img :src="enter" height="16" title="Lägg in anmälningar">
             </router-link>
         </li>
+        <li v-else>&nbsp;</li>
         <li>
             <router-link :to="'/tavlingar/' + competition.id">
                 <img :src="settings" height="16" title="Admin">

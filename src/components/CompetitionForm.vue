@@ -4,6 +4,7 @@ import useCompetitionStore from '@/stores/competitionStore.js'
 import useSwimstyleStore from '@/stores/swimstyleStore.js'
 import SessionsList from "@/components/SessionsList.vue";
 import EventsList from "@/components/EventsList.vue";
+import {storeToRefs} from "pinia";
 
 const props = defineProps(['competitionid'])
 
@@ -11,20 +12,18 @@ const competitionStore = useCompetitionStore()
 const swimstyleStore = useSwimstyleStore()
 const eventsList = ref([])
 
-const competition = ref({})
+const {competition} = storeToRefs(competitionStore)
 
 onMounted(() => {
     swimstyleStore.getAll().then(ss => {
         eventsList.value = ss
     })
 
-    if (props.competitionid === '') {
-        competition.value = new competitionStore.emptyCompetition()
+
+    if (!props.competitionid ) {
+        competitionStore.reset()
     } else {
         competitionStore.getCompetition(props.competitionid)
-            .then(data => {
-                competition.value = data
-            })
     }
 })
 

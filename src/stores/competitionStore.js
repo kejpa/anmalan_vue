@@ -7,30 +7,31 @@ const useCompetitionStore = defineStore('competitionStore', () => {
     const isLoading = ref(false)
     const hasLoaded = ref(false)
     let loadPromise = null // används för att dela samma promise
+    const competition = ref(initialState())
 
-    const competition = ref({
-        id: '',
-        name: '',
-        city: '',
-        country: '',
-        date: '',
-        course: 'SCM',
-        sessions: [
-            {
+    function initialState() {
+        return {
+            id: '',
+            name: '',
+            city: '',
+            country: '',
+            date: '',
+            course: 'SCM',
+            sessions: [{
                 number: 1,
                 name: 'Session 1',
-                date: '2023-10-01',
-                daytime: '15:39',
-            },
-        ],
-        events: [],
-        lastEntryDate: '',
-        swimtimesFrom: '',
-        swimtimesTo: '',
-        editSwimtimes: false,
-        editSessions: false,
-        editEvents: false,
-    })
+                date: (new Date()).toLocaleDateString(),
+                daytime: '09:00',
+            },],
+            events: [],
+            lastEntryDate: '',
+            swimtimesFrom: '',
+            swimtimesTo: '',
+            editSwimtimes: false,
+            editSessions: false,
+            editEvents: false,
+        }
+    }
 
     function setCompetition(newCompetition) {
         competition.value = newCompetition
@@ -42,8 +43,8 @@ const useCompetitionStore = defineStore('competitionStore', () => {
             await getAllCompetitions()
         }
 
-        // Returnera posten (eller undefined om inte hittad)
-        return allCompetitions.value.find((comp) => comp.id === id);
+        // Returnera posten (eller tom om inte hittad)
+        competition.value = allCompetitions.value.find((comp) => comp.id === id) ?? initialState();
     }
 
     async function getAllCompetitions() {
@@ -105,18 +106,20 @@ const useCompetitionStore = defineStore('competitionStore', () => {
         })
     }
 
-    /*
-        function getEvent(evId) {
-            return competition.value.events.find((ev) => ev.eventid === evId) ??''
-        }
-    */
+
+    function reset() {
+        competition.value = initialState()
+    }
+
     return {
         setCompetition,
         getCompetition,
         saveCompetition,
         getAllCompetitions,
         removeCompetition,
-        allCompetitions
+        allCompetitions,
+        reset,
+        competition
     }
 })
 export default useCompetitionStore
