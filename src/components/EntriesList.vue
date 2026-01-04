@@ -8,13 +8,14 @@ import {onMounted, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
 
 const props = defineProps(['competitionid']);
-const competition = ref();
+const competitionStore = useCompetitionStore();
+const {competition} = storeToRefs(competitionStore);
 const {allEntries} = storeToRefs(useEntriesStore());
 const {allSwimmers} = storeToRefs(useSwimmerStore());
 const sortOrder = ref('firstname asc');
 
-onMounted(async () => {
-    competition.value = await useCompetitionStore().getCompetition(props.competitionid);
+onMounted( () => {
+     useCompetitionStore().getCompetition(props.competitionid);
 })
 watch(
     allEntries,

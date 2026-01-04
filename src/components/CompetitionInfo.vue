@@ -1,15 +1,13 @@
 <script setup>
-import {ref, watchEffect} from "vue";
+import {watchEffect} from "vue";
 import useCompetitionStore from "@/stores/competitionStore.js";
+import {storeToRefs} from "pinia";
 
 const props = defineProps(['competitionid'])
 const competitionStore = useCompetitionStore()
-const competition = ref({})
+const {competition} = storeToRefs(competitionStore)
 watchEffect(() => {
     competitionStore.getCompetition(props.competitionid)
-        .then(data => {
-            competition.value = data
-        })
 })
 </script>
 

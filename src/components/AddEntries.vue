@@ -6,26 +6,28 @@ import add from '@/assets/images/add.png'
 import remove from '@/assets/images/delete.png'
 import notAllowed from '@/assets/images/notAllowed.png'
 import useEntriesStore from "@/stores/entriesStore.js";
+import {storeToRefs} from "pinia";
+import {intToSwimtime, swimtimeToInt} from "@/assets/swimtimeFunctions.js";
 
 const props = defineProps(['competitionId', 'swimmer'])
 const emit = defineEmits(['close'])
 
 const competitionStore = useCompetitionStore();
-const competition = ref({})
+const {competition} = storeToRefs(competitionStore)
 const swimmerStore = useSwimmerStore();
 const swimmerEvents = ref([]);
 const entriesStore = useEntriesStore();
-const entries =ref([])
+const entries = ref([])
+const swimtime = ref('00:00.00')
 
 watch(() => props.competitionId, async (newId) => {
         if (!newId) return
 
         try {
-            const data = await competitionStore.getCompetition(newId)
-            competition.value = data
+            competitionStore.getCompetition(newId)
         } catch (err) {
             console.error("Kunde inte hämta tävlingen:", err)
-            competition.value = null
+            competitionStore.reset();
         }
     },
     {immediate: true} // Kör direkt vid mount
@@ -34,19 +36,28 @@ watch(() => props.swimmer, async (newSwimmer) => {
         if (!newSwimmer) return
 
         try {
-            entries.value=await entriesStore.getEntries(newSwimmer.id)
+            entries.value = await entriesStore.getEntries(newSwimmer.id)
             const data = await swimmerStore.getResults(props.competitionId, newSwimmer.id)
             for (let event of competition.value.events) {
                 let time = data.find(itm => itm.eventid === event.eventid)
                 if (time) {
                     const se = {event}
                     se.hasSwimmerEntry = false;
+                    for (const itm in time.tider) {
+                        time.tider[itm].swimtime = time.tider[itm].swimtime.substring(3)
+                    }
+                    if (time.tider.length === 0) {
+                        time.tider = [{
+                            "swimtime": '00:00.00',
+                            "course": competition.value.course
+                        }]
+                    }
                     se.tider = time.tider
                     if (time.guldTid) {
                         se.guldtid = time.guldTid.swimtime
                     }
                     se.hasSwimmerEntry = entries.value.some(itm => {
-                       return itm.swimmerid===newSwimmer.id && itm.eventid === event.eventid
+                        return itm.swimmerid === newSwimmer.id && itm.eventid === event.eventid
                     })
                     swimmerEvents.value.push(se)
                 }
@@ -69,9 +80,12 @@ function closeModal() {
 
 function addEntry(eventid, entryInfo) {
     const entry = {}
-    entry.competitionid=props.competitionId
+    entry.competitionid = props.competitionId
     entry.swimmerid = props.swimmer.id
     entry.eventid = eventid
+    if (typeof (entryInfo) === 'string') {
+        entryInfo = {swimtime: entryInfo, course: competition.value.course}
+    }
     entry.info = entryInfo
 
     entries.value.push(entry)
@@ -79,13 +93,13 @@ function addEntry(eventid, entryInfo) {
     swimmerEvents.value.find(itm => itm.event.eventid === eventid).hasSwimmerEntry = true;
 
     // Sortera entries efter grennummer
-    entries.value.sort((a,b)=>{
-        return competition.value.events.find(e => e.eventid===a.eventid).number-competition.value.events.find(e => e.eventid===b.eventid).number
+    entries.value.sort((a, b) => {
+        return competition.value.events.find(e => e.eventid === a.eventid).number - competition.value.events.find(e => e.eventid === b.eventid).number
     })
 }
 
-function removeEntry(entry){
-    entries.value=entries.value.filter(itm => itm !== entry);
+function removeEntry(entry) {
+    entries.value = entries.value.filter(itm => itm !== entry);
     entriesStore.removeEntry(entry.id);
     swimmerEvents.value.find(itm => itm.event.eventid === entry.eventid).hasSwimmerEntry = false;
 }
@@ -108,7 +122,7 @@ function removeEntry(entry){
                     <span v-if="event.tider.SCM?.swimtime" class="entrytimes">
                     <span v-if="event.tider.SCM?.swimtime>event.guldtid" class="enterEvent"><img
                         :src="add"
-                        @click="addEntry(event.event.eventid,event.tider.SCM, $event)"></span>
+                        @click="addEntry(event.event.eventid,event.tider.SCM)"></span>
                     <span v-else class="enterEvent"><img :src="notAllowed"></span>
                         {{ event.tider.SCM?.swimtime ? `${event.tider.SCM?.swimtime} (25m)` : '' }}
                     </span>
@@ -117,18 +131,31 @@ function removeEntry(entry){
                     <span v-if="event.tider.SCM?.swimtime" class="entrytimes">
                         <span class="enterEvent">
                             <img :src="add"
-                                 @click="addEntry(event.event.eventid,event.tider.SCM, $event)">
+                                 @click="addEntry(event.event.eventid,event.tider.SCM)">
                         </span>
                         {{ event.tider.SCM?.swimtime ? `${event.tider.SCM?.swimtime} (25m)` : '' }}
                     </span>
                     <span v-if="event.tider.LCM?.swimtime" class="entrytimes">
                         <span class="enterEvent">
                             <img :src="add"
-                                 @click="addEntry(event.event.eventid,event.tider.LCM, $event)">
+                                 @click="addEntry(event.event.eventid,event.tider.LCM)">
                         </span>
                         {{ event.tider.LCM?.swimtime ? `${event.tider.LCM?.swimtime} (50m)` : '' }}
                     </span>
-                    <span v-if="event.tider.length===0" class="entrytimes">Inga tider angiven</span>
+                    <span v-if="event.tider[0] && competition.editSwimtimes"
+                          class="entrytimes enterEvent">
+                        <img :src="add"
+                             @mouseup.prevent="addEntry(event.event.eventid,event.tider[0].swimtime)">
+                        <input type="text" size="6" v-model="event.tider[0].swimtime"
+                               @focus="event.tider[0].swimtime=swimtimeToInt(event.tider[0].swimtime)"
+                               @blur="event.tider[0].swimtime=intToSwimtime(event.tider[0].swimtime)"/>
+                    </span>
+                    <span v-if="event.tider.length===0 && !competition.editSwimtimes"
+                          class="entrytimes enterEvent">
+                        <img :src="add"
+                             @click="addEntry(event.event.eventid,event.tider[0].swimtime)">
+                        Saknar tid
+                    </span>
                 </li>
                 <li v-else>&nbsp;</li>
             </ul>
@@ -149,7 +176,7 @@ function removeEntry(entry){
                     }}
                 </li>
                 <li>{{
-                        `${entry.info.swimtime} ${entry.info.course === 'SCM' ? '(25)' : '(50m)'}`
+                        `${entry.info.swimtime} ${entry.info.course === 'SCM' ? '(25m)' : '(50m)'}`
                     }}
                 </li>
             </ul>
@@ -213,5 +240,10 @@ span.entrytimes {
 
 .enterEvent img {
     height: 1em;
+}
+
+input[type=text] {
+    font: inherit;
+    text-align: right;
 }
 </style>
