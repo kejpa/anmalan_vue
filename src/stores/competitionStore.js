@@ -28,7 +28,6 @@ const useCompetitionStore = defineStore('competitionStore', () => {
             swimtimesFrom: '',
             swimtimesTo: '',
             editSwimtimes: false,
-            editSessions: false,
             editEvents: false,
         }
     }

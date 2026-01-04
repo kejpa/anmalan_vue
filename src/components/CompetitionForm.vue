@@ -1,24 +1,22 @@
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted} from 'vue'
 import useCompetitionStore from '@/stores/competitionStore.js'
 import useSwimstyleStore from '@/stores/swimstyleStore.js'
 import SessionsList from "@/components/SessionsList.vue";
 import EventsList from "@/components/EventsList.vue";
 import {storeToRefs} from "pinia";
+import useUserStore from "@/stores/userStore.js";
 
 const props = defineProps(['competitionid'])
-
+const userStore = useUserStore()
+const {user}=storeToRefs(userStore)
 const competitionStore = useCompetitionStore()
 const swimstyleStore = useSwimstyleStore()
-const eventsList = ref([])
 
 const {competition} = storeToRefs(competitionStore)
 
 onMounted(() => {
-    swimstyleStore.getAll().then(ss => {
-        eventsList.value = ss
-    })
-
+    swimstyleStore.fetch()
 
     if (!props.competitionid ) {
         competitionStore.reset()
@@ -132,32 +130,20 @@ function setSessionDate(e) {
         <fieldset id="admin">
             <legend>Admin</legend>
             <label>
-                Administrera tävlingspass:
-                <input type="checkbox" v-model="competition.editSessions"/>
-            </label>
-            <label>
                 Administrera grenar:
                 <input type="checkbox" v-model="competition.editEvents"/>
             </label>
         </fieldset>
         <fieldset id="sessions">
             <legend>Tävlingspass</legend>
-            <SessionsList
-                :sessions="competition.sessions"
-                :editSession="competition.editSessions ?? true"
-            />
-            <button v-if="competition.editSessions ?? true" @click="addSession">Lägg till pass
+            <SessionsList />
+            <button @click="addSession">Lägg till pass
             </button>
         </fieldset>
         <fieldset id="events">
             <legend>Grenar</legend>
-            <EventsList
-                :events="competition.events"
-                :sessions="competition.sessions ?? null"
-                :eventsList="eventsList.filter((e) => e.course === competition.course)"
-                :addEvents="competition.editEvents ?? true"
-            />
-            <button v-if="competition.editEvents ?? true" @click="addEvent">Lägg till gren</button>
+            <EventsList />
+            <button @click="addEvent">Lägg till gren</button>
         </fieldset>
         <button v-if="competition.id===''" type="submit">Skapa Tävling</button>
         <button v-else type="submit">Spara Tävling</button>

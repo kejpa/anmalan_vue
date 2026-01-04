@@ -3,13 +3,13 @@ import {ref} from 'vue'
 import APIServices from '../services/APIServices.js'
 
 const useSwimstyleStore = defineStore('swimstyleStore', () => {
-    const swimstyle = ref([])
+    const allSwimstyles = ref([])
 
     function fetch() {
         return new Promise((resolve, reject) =>
             APIServices.get('getSwimstyles')
                 .then((data) => {
-                    swimstyle.value = data
+                    allSwimstyles.value = data
                     resolve(true)
                 })
                 .catch((error) => {
@@ -19,22 +19,10 @@ const useSwimstyleStore = defineStore('swimstyleStore', () => {
         )
     }
 
-    function getAll() {
-        return new Promise((resolve) => {
-            if (swimstyle.value.length === 0) {
-                fetch()
-                    .then(() => {
-                        resolve(swimstyle.value)
-                    })
-            }
-            resolve(swimstyle.value)
-        })
-    }
-
     function getSwimstyle(id) {
-        return swimstyle.value.find((style) => style.swimstyleid === id)
+        return allSwimstyles.value.find((style) => style.swimstyleid === id)
     }
 
-    return {fetch, getAll, getSwimstyle}
+    return {fetch, getSwimstyle, allSwimstyles}
 })
 export default useSwimstyleStore

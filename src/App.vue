@@ -1,16 +1,16 @@
 <script setup>
 import {onMounted, ref} from 'vue'
-import APIServices from '@/services/APIServices.js'
+import {storeToRefs} from "pinia";
+import {RouterLink, RouterView} from 'vue-router'
 import {storeAccessToken} from '@/stores/accessTokenStorage.js'
+import APIServices from '@/services/APIServices.js'
 import useUserStore from '@/stores/userStore.js'
 import SplashScreen from '@/components/SplashScreen.vue'
 import LoginScreen from '@/components/LoginScreen.vue'
-import {RouterLink, RouterView} from 'vue-router'
-import useSwimstyleStore from "@/stores/swimstyleStore.js";
 
 const showScreen = ref('splash')
-const user = ref(useUserStore().getUser())
-const swimstyles = ref(useSwimstyleStore().fetch())
+const userStore = useUserStore()
+const {user} = storeToRefs(userStore)
 
 onMounted(() => {
     // Prova logga in

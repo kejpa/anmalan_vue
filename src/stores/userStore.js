@@ -8,10 +8,6 @@ const useUserStore = defineStore('userStore', () => {
     user.value = newUser
   }
 
-  function getUser() {
-    return user.value
-  }
-
-  return { setUser, getUser }
+  return { setUser, user }
 })
 export default useUserStore
