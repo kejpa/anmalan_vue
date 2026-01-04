@@ -2,6 +2,8 @@ import {createRouter, createWebHistory} from 'vue-router'
 import CompetitionsView from "@/views/CompetitionsView.vue";
 import EditCompetitionView from "@/views/EditCompetitionView.vue";
 import EntriesView from "@/views/EntriesView.vue";
+import {storeToRefs} from "pinia";
+import useUserStore from "@/stores/userStore.js";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,13 +22,18 @@ const router = createRouter({
             path: '/tavlingar/:id',
             name: 'competition',
             component: EditCompetitionView,
-//            props: true,
+            beforeEnter: () => {
+                const {user} = storeToRefs(useUserStore())
+
+                if (!user.isAdmin) {
+                    return { name: "competitions" }
+                }
+            }
         },
         {
             path: '/anmalningar/:id',
             name: 'entries',
             component: EntriesView,
-    //        props: true,
         },
         {
             path: '/about',
