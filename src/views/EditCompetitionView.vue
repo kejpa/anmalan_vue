@@ -2,9 +2,7 @@
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/userStore.js'
 import CompetitionForm from '@/components/CompetitionForm.vue'
-import {useRoute} from "vue-router";
 
-const params = useRoute().params
 const user = ref(useUserStore().getUser())
 
 onMounted(() => {})
@@ -12,7 +10,7 @@ onMounted(() => {})
 
 <template>
   <main>
-    <CompetitionForm :competitionid="params.id" />
+    <CompetitionForm />
   </main>
 </template>
 <style scoped>

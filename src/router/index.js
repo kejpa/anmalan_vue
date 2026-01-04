@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import CompetitionsView from "@/views/CompetitionsView.vue";
 import EditCompetitionView from "@/views/EditCompetitionView.vue";
 import EntriesView from "@/views/EntriesView.vue";
@@ -10,7 +9,7 @@ const router = createRouter({
         {
             path: '/',
             name: 'home',
-            component: HomeView,
+            component: CompetitionsView,
         },
         {
             path: '/tavlingar',
@@ -21,13 +20,13 @@ const router = createRouter({
             path: '/tavlingar/:id',
             name: 'competition',
             component: EditCompetitionView,
-            props: true,
+//            props: true,
         },
         {
             path: '/anmalningar/:id',
             name: 'entries',
             component: EntriesView,
-            props: true,
+    //        props: true,
         },
         {
             path: '/about',

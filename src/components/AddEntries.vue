@@ -44,7 +44,7 @@ watch(() => props.swimmer, async (newSwimmer) => {
             return
         }
 
-        const currentUmanarStroke = []; // Array som fungerar som en flagga för rött utmanargren per simsätt
+        const currentUmanarStroke = []; // Array som fungerar som en flagga för rätt utmanargren per simsätt
         for (let event of competition.value.events) {
             let time = data.find(itm => itm.eventid === event.eventid)
             if (time) {

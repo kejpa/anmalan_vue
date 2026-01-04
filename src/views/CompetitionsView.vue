@@ -10,6 +10,7 @@ onMounted(() => {})
 
 <template>
   <main>
+      <router-link to="/tavlingar/new">Ny tävling</router-link>
     <CompetitionList />
   </main>
 </template>

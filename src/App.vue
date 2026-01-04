@@ -60,7 +60,6 @@ function logout() {
             </div>
             <img class="logout" alt="Logout" @click="logout()" src="@/assets/images/logout.png"/>
             <nav>
-                <RouterLink to="/">Home</RouterLink>
                 <RouterLink to="/tavlingar">Tävlingar</RouterLink>
                 <RouterLink to="/about">About</RouterLink>
             </nav>
