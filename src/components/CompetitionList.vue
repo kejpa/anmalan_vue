@@ -1,13 +1,16 @@
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted} from 'vue'
+import {storeToRefs} from "pinia";
+import APIServices from "@/services/APIServices.ts";
 import useCompetitionStore from '@/stores/competitionStore.js'
+import useUserStore from "@/stores/userStore.js";
 import settings from '@/assets/images/settings.png'
 import enter from '@/assets/images/enter.png'
 import remove from "@/assets/images/delete.png"
 import download from "@/assets/images/download.png"
-import {storeToRefs} from "pinia";
-import APIServices from "@/services/APIServices.ts";
 
+const userStore = useUserStore()
+const {user} = storeToRefs(userStore)
 const competitionStore = useCompetitionStore()
 const {allCompetitions} = storeToRefs(competitionStore)
 
@@ -49,20 +52,27 @@ function sortedCompetitions() {
             </router-link>
         </li>
         <li v-else>&nbsp;</li>
-        <li>
+        <li v-if="user.isAdmin">
             <router-link :to="'/tavlingar/' + competition.id">
                 <img :src="settings" height="16" title="Admin">
             </router-link>
         </li>
+        <li v-else-if="competition.editEvents">
+            <router-link :to="'/grenar/' + competition.id">
+                <img :src="settings" height="16" title="Admin">
+            </router-link>
+        </li>
+        <li v-else>&nbsp;</li>
         <li>
             {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
         </li>
         <li>
             <img :src="download" height="16" title="Download" @click="downloadEntries(competition.id)">
         </li>
-        <li>
+        <li v-if="user.isAdmin">
             <img :src="remove" height="16" title="Radera" @click="removeCompetition(competition.id)">
         </li>
+        <li v-else>&nbsp;</li>
     </ul>
 </template>
 
