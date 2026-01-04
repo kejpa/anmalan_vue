@@ -1,13 +1,13 @@
 <script setup>
 import {ref, watch} from "vue";
-import useCompetitionStore from "@/stores/competitionStore.js";
-import useSwimmerStore from "@/stores/swimmerStore.js";
+import {storeToRefs} from "pinia";
+import {intToSwimtime, swimtimeToInt} from "@/assets/swimtimeFunctions.js";
 import add from '@/assets/images/add.png'
 import remove from '@/assets/images/delete.png'
 import notAllowed from '@/assets/images/notAllowed.png'
 import useEntriesStore from "@/stores/entriesStore.js";
-import {storeToRefs} from "pinia";
-import {intToSwimtime, swimtimeToInt} from "@/assets/swimtimeFunctions.js";
+import useCompetitionStore from "@/stores/competitionStore.js";
+import useSwimmerStore from "@/stores/swimmerStore.js";
 
 const props = defineProps(['competitionId', 'swimmer'])
 const emit = defineEmits(['close'])
@@ -18,7 +18,6 @@ const swimmerStore = useSwimmerStore();
 const swimmerEvents = ref([]);
 const entriesStore = useEntriesStore();
 const entries = ref([])
-const swimtime = ref('00:00.00')
 
 watch(() => props.competitionId, async (newId) => {
         if (!newId) return
@@ -34,37 +33,58 @@ watch(() => props.competitionId, async (newId) => {
 )
 watch(() => props.swimmer, async (newSwimmer) => {
         if (!newSwimmer) return
+        let data
 
         try {
             entries.value = await entriesStore.getEntries(newSwimmer.id)
-            const data = await swimmerStore.getResults(props.competitionId, newSwimmer.id)
-            for (let event of competition.value.events) {
-                let time = data.find(itm => itm.eventid === event.eventid)
-                if (time) {
-                    const se = {event}
-                    se.hasSwimmerEntry = false;
-                    for (const itm in time.tider) {
-                        time.tider[itm].swimtime = time.tider[itm].swimtime.substring(3)
-                    }
-                    if (time.tider.length === 0) {
-                        time.tider = [{
-                            "swimtime": '00:00.00',
-                            "course": competition.value.course
-                        }]
-                    }
-                    se.tider = time.tider
-                    if (time.guldTid) {
-                        se.guldtid = time.guldTid.swimtime
-                    }
-                    se.hasSwimmerEntry = entries.value.some(itm => {
-                        return itm.swimmerid === newSwimmer.id && itm.eventid === event.eventid
-                    })
-                    swimmerEvents.value.push(se)
-                }
-            }
+            data = await swimmerStore.getResults(props.competitionId, newSwimmer.id)
         } catch (err) {
             console.error("Kunde inte hämta resultat för simmare:", err)
             swimmerEvents.value = []
+            return
+        }
+
+        const currentUmanarStroke = []; // Array som fungerar som en flagga för rött utmanargren per simsätt
+        for (let event of competition.value.events) {
+            let time = data.find(itm => itm.eventid === event.eventid)
+            if (time) {
+                const se = {event}
+                se.hasSwimmerEntry = false;
+                for (const itm in time.tider) {
+                    // Ta bort timvärdet för tiden
+                    time.tider[itm].swimtime = time.tider[itm].swimtime.slice(-8)
+                }
+                if (time.tider.length === 0) {
+                    // Om ingen tid uppnåtts inom giltighetsperioden skapas en nolltid
+                    time.tider = [{
+                        "swimtime": '00:00.00',
+                        "course": competition.value.course
+                    }]
+                }
+                se.tider = time.tider
+
+                if (event.utmanare && time.guldTid) {
+                    // Om det är en utmanargren som aktuell simmare ska klara finns en guldtid som ska läggas till
+                    se.guldtid = time.guldTid.swimtime
+                    if ((time.tider[0] || time.tider?.SCM.swimtime > se.guldtid) && !currentUmanarStroke.find(itm => itm === event.swimstyle[0].stroke)) {
+                        // aktuell gren (event) är den utmanargren som simmaren ska delta i för detta simsätt
+                        se.currentEvent = true
+                        currentUmanarStroke.push(event.swimstyle[0].stroke)
+                    } else if (time.tider[0] && currentUmanarStroke.find(itm => itm === event.swimstyle[0].stroke)) {
+                        // Lägg inte till grenen om simmaren inte har någon tid och det inte är aktuell gren för simsättet
+                        // t.ex. en 50m sträcka när simmaren inte fått gultid på 25m
+                        continue
+                    }
+                } else if (event.utmanare && !time.guldTid) {
+                    // Lägg inte till grenen om det är en utmanargren och det inte finns någon guldtid att uppnå
+                    // dvs simmaren ska inte alls genomföra aktuell gren i sin utmanarversion.
+                    continue
+                }
+                se.hasSwimmerEntry = entries.value.some(itm => {
+                    return itm.swimmerid === newSwimmer.id && itm.eventid === event.eventid
+                })
+                swimmerEvents.value.push(se)
+            }
         }
     },
     {immediate: true} // Kör direkt vid mount
@@ -116,14 +136,18 @@ function removeEntry(entry) {
             <ul v-for="event in swimmerEvents.filter(e => e.hasSwimmerEntry===false)"
                 :key="event.event.eventid">
                 <li>{{ event.event.number }}</li>
-                <li>{{ `${event.event.name} ${event.event.utmanare ? " (Utmanare)" : ""}` }}</li>
+                <li>{{ `${event.event.name}` }}</li>
                 <li v-if="event.tider && event.event.utmanare"
                     :title="event.tider.SCM?.swimtime<event.guldtid ? 'Uppnådd tid bättre än guldtiden' :''">
-                    <span v-if="event.tider.SCM?.swimtime" class="entrytimes">
-                    <span v-if="event.tider.SCM?.swimtime>event.guldtid" class="enterEvent"><img
-                        :src="add"
-                        @click="addEntry(event.event.eventid,event.tider.SCM)"></span>
-                    <span v-else class="enterEvent"><img :src="notAllowed"></span>
+                    <span v-if="event.currentEvent || event.tider.SCM?.swimtime" class="entrytimes">
+                        <span v-if="event.tider.SCM?.swimtime>event.guldtid" class="enterEvent">
+                            <img :src="add" @click="addEntry(event.event.eventid,event.tider.SCM)">
+                        </span>
+                        <span v-else-if="event.currentEvent" class="entrytimes enterEvent">
+                            <img :src="add" @click="addEntry(event.event.eventid,'00:00.00')">
+                            00:00.00
+                        </span>
+                        <span v-else class="enterEvent"><img :src="notAllowed"></span>
                         {{ event.tider.SCM?.swimtime ? `${event.tider.SCM?.swimtime} (25m)` : '' }}
                     </span>
                 </li>
