@@ -1,9 +1,11 @@
 import {createRouter, createWebHistory} from 'vue-router'
+import {storeToRefs} from "pinia";
 import CompetitionsView from "@/views/CompetitionsView.vue";
 import EditCompetitionView from "@/views/EditCompetitionView.vue";
 import EntriesView from "@/views/EntriesView.vue";
-import {storeToRefs} from "pinia";
+import EditEventsView from "@/views/EditEventsView.vue";
 import useUserStore from "@/stores/userStore.js";
+import useCompetitionStore from "@/stores/competitionStore.js";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,11 +24,12 @@ const router = createRouter({
             path: '/tavlingar/:id',
             name: 'competition',
             component: EditCompetitionView,
-            beforeEnter: () => {
-                const {user} = storeToRefs(useUserStore())
+            beforeEnter: async () => {
+                const userStore=useUserStore()
+                const {user} = storeToRefs(userStore)
 
-                if (!user.isAdmin) {
-                    return { name: "competitions" }
+                if (!user.value.isAdmin) {
+                    return {name: "competitions"}
                 }
             }
         },
@@ -34,6 +37,32 @@ const router = createRouter({
             path: '/anmalningar/:id',
             name: 'entries',
             component: EntriesView,
+        },
+        {
+            path: '/grenar/:id',
+            name: 'editEvents',
+            component: EditEventsView,
+            async beforeEnter(to) {
+                const competitionStore = useCompetitionStore()
+                const {competition} = storeToRefs(competitionStore)
+                const id = to.params.id
+
+                // Se till att tävlingen är laddad
+                if (!competition.value.id) {
+                    await competitionStore.getCompetition(id)
+                    console.log(competition.value.id)
+                }
+
+                // Blockera om edits inte är tillåtna
+                if (!competition.value.editEvents) {
+                    return {
+                        name: "competitions",
+                    }
+                }
+
+                // Tillåt navigation
+                return true
+            }
         },
         {
             path: '/about',

@@ -1,15 +1,23 @@
 <script setup>
+import {computed, onMounted} from "vue";
 import {storeToRefs} from "pinia";
 import add from '@/assets/images/add.png'
 import remove from '@/assets/images/delete.png'
 import useSwimstyleStore from '@/stores/swimstyleStore.js'
 import useCompetitionStore from "@/stores/competitionStore.js";
+import useUserStore from "@/stores/userStore.js";
 
+const props=defineProps(['competitionid'])
+const userStore = useUserStore()
+const {user} = storeToRefs(userStore)
 const competitionStore = useCompetitionStore()
 const {competition} = storeToRefs(competitionStore)
 const swimstyleStore = useSwimstyleStore()
 const {allSwimstyles} = storeToRefs(swimstyleStore)
 
+onMounted(async ()=>{
+    await competitionStore.getCompetition(props.competitionid)
+})
 function removeEvent(eventNumber) {
     const index = competition.events.findIndex((s) => s.number === eventNumber)
     if (index !== -1) {
@@ -21,9 +29,36 @@ function removeEvent(eventNumber) {
     }
 }
 
-function sortEvents() {
-    competition.events.sort((a, b) => a.number - b.number)
+const sortedEvents = computed(() => {
+    return [...competition.value.events].sort((a, b) => a.number - b.number)
+})
+
+function addEvent(e) {
+    e.preventDefault()
+    let event = {
+        number: competition.value.events.length + 1,
+        eventid: nextEventId(),
+        name: ' ',
+        swimstyleid: 0,
+        swimstyle: [],
+        gender: 'M',
+        utmanare: false,
+        agegroups: [{agegroupid: 1, agemin: 0, agemax: 99}],
+        session: 1,
+        round: 'TIM'
+    }
+    competition.value.events.push(event)
 }
+
+function nextEventId() {
+    let nextId = competition.events.reduce((nr, itm) => {
+        return itm.eventid > nr ? itm.eventid : nr
+    }, 0)
+    nextId++
+
+    return nextId > 1000 ? nextId : 1000 + nextId
+}
+
 </script>
 
 <template>
@@ -39,14 +74,13 @@ function sortEvents() {
         <li>Omgång</li>
     </ul>
 
-    <ul v-for="swimEvent in competition.events" :key="swimEvent.number">
-        <li>
+    <ul v-for="swimEvent in sortedEvents" :key="swimEvent.eventid">
+        <li v-if="user.isAdmin">
             <img :src="remove" alt="Radera" @click="removeEvent(swimEvent.number)"/>
         </li>
-        <!--     TODO: Lägg till funktionalitet för att flytta grenar upp och ner -->
+        <li v-else>&nbsp;</li>
         <li>
-            <input type="number" min="1" v-model="swimEvent.number" size="1"
-                   @change="sortEvents"/>
+            <input type="number" min="1" v-model="swimEvent.number" size="1"/>
         </li>
         <li>
             <select v-model="swimEvent.swimstyleid"
@@ -106,6 +140,7 @@ function sortEvents() {
             </select>
         </li>
     </ul>
+    <button @click="addEvent">Lägg till gren</button>
 </template>
 
 <style scoped>

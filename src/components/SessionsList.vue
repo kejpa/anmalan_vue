@@ -2,10 +2,15 @@
 import remove from '@/assets/images/delete.png'
 import {storeToRefs} from "pinia";
 import useCompetitionStore from "@/stores/competitionStore.js";
+import {onMounted} from "vue";
 
+const props=defineProps(['competitionid'])
 const competitionStore = useCompetitionStore()
 const {competition} = storeToRefs(competitionStore)
 
+onMounted(async ()=>{
+    await competitionStore.getCompetition(props.competitionid)
+})
 function removeSession(sessionNumber) {
     const index = competition.sessions.findIndex((s) => s.number === sessionNumber)
     if (index !== -1) {
@@ -20,6 +25,21 @@ function removeSession(sessionNumber) {
         })
     }
 }
+
+function addSession(e) {
+    e.preventDefault()
+    let session = {
+        number: competition.value.sessions.length + 1,
+        name: 'Session ' + (competition.value.sessions.length + 1),
+        date:
+            competition.value.sessions[competition.value.sessions.length - 1]?.date ||
+            competition.value.date ||
+            '',
+        daytime: '',
+    }
+    competition.value.sessions.push(session)
+}
+
 </script>
 
 <template>
@@ -48,6 +68,7 @@ function removeSession(sessionNumber) {
             <input type="time" v-model="session.daytime"/>
         </li>
     </ul>
+    <button @click="addSession">Lägg till pass</button>
 </template>
 
 <style scoped>

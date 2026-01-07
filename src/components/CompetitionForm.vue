@@ -25,36 +25,7 @@ onMounted(() => {
     }
 })
 
-function addSession(e) {
-    e.preventDefault()
-    let session = {
-        number: competition.value.sessions.length + 1,
-        name: 'Session ' + (competition.value.sessions.length + 1),
-        date:
-            competition.value.sessions[competition.value.sessions.length - 1]?.date ||
-            competition.value.date ||
-            '',
-        daytime: '',
-    }
-    competition.value.sessions.push(session)
-}
 
-function addEvent(e) {
-    e.preventDefault()
-    let event = {
-        number: competition.value.events.length + 1,
-        eventid: 0,
-        name: ' ',
-        swimstyleid: 0,
-        swimstyle: [],
-        gender: 'M',
-        utmanare: false,
-        agegroups: [{agegroupid: 1, agemin: 0, agemax: 99}],
-        session: 1,
-        round: 'TIM'
-    }
-    competition.value.events.push(event)
-}
 
 function submitCompetition(e) {
     e.preventDefault()
@@ -136,13 +107,12 @@ function setSessionDate(e) {
         </fieldset>
         <fieldset id="sessions">
             <legend>Tävlingspass</legend>
-            <SessionsList />
-            <button @click="addSession">Lägg till pass
-            </button>
+            <SessionsList :competitionid="props.competitionid" />
+
         </fieldset>
         <fieldset id="events">
             <legend>Grenar</legend>
-            <EventsList />
+            <EventsList :competitionid="props.competitionid"/>
             <button @click="addEvent">Lägg till gren</button>
         </fieldset>
         <button v-if="competition.id===''" type="submit">Skapa Tävling</button>

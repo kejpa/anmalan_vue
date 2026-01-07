@@ -4,12 +4,17 @@ import useUserStore from '@/stores/userStore.js'
 import CompetitionForm from '@/components/CompetitionForm.vue'
 import {storeToRefs} from "pinia";
 import {useRoute} from "vue-router";
+import useCompetitionStore from "@/stores/competitionStore.js";
 
 const route = useRoute()
 const userStore = useUserStore()
 const user = storeToRefs(userStore)
+const competitionStore=useCompetitionStore()
+const {competition}=storeToRefs(competitionStore)
 
-onMounted(() => {})
+onMounted(async() => {
+    await competitionStore.getCompetition(route.params.id)
+})
 </script>
 
 <template>

@@ -7,10 +7,12 @@ import APIServices from '@/services/APIServices.js'
 import useUserStore from '@/stores/userStore.js'
 import SplashScreen from '@/components/SplashScreen.vue'
 import LoginScreen from '@/components/LoginScreen.vue'
+import useSwimstyleStore from "@/stores/swimstyleStore.js";
 
 const showScreen = ref('splash')
 const userStore = useUserStore()
 const {user} = storeToRefs(userStore)
+const swimstyle=useSwimstyleStore()
 
 onMounted(() => {
     // Prova logga in
@@ -21,7 +23,8 @@ onMounted(() => {
             // Spara användaren i UserStore
             let userStore = useUserStore()
             userStore.setUser(data.user)
-            user.value = data.user
+            swimstyle.fetch()
+ //           user.value = data.user
 
             // Visa lista vid lyckad inloggning
             showScreen.value = 'home'
