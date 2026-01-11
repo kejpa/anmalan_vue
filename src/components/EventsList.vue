@@ -65,7 +65,7 @@ function addEvent(e) {
 }
 
 function nextEventId() {
-    let nextId = competition.events.reduce((nr, itm) => {
+    let nextId = competition.value.events.reduce((nr, itm) => {
         return itm.eventid > nr ? itm.eventid : nr
     }, 0)
     nextId++
