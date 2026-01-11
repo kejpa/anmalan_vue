@@ -111,7 +111,7 @@ ul {
     display: grid;
     grid-template-columns: 4fr 1fr 3fr 3fr 1.2em;
     list-style: none;
-    background-color: #eee;
+    background-color: var(--color-background-alternating-even);
     padding-left: .5em;
 }
 
@@ -123,8 +123,8 @@ li.sort {
     cursor: pointer;
 }
 
-ul:nth-child(even) {
-    background-color: #ddd;
+ul:nth-child(odd) {
+    background-color: var(--color-background-alternating-odd);
 }
 
 li {

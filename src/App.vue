@@ -12,7 +12,7 @@ import useSwimstyleStore from "@/stores/swimstyleStore.js";
 const showScreen = ref('splash')
 const userStore = useUserStore()
 const {user} = storeToRefs(userStore)
-const swimstyle=useSwimstyleStore()
+const swimstyle = useSwimstyleStore()
 
 onMounted(() => {
     // Prova logga in
@@ -24,7 +24,7 @@ onMounted(() => {
             let userStore = useUserStore()
             userStore.setUser(data.user)
             swimstyle.fetch()
- //           user.value = data.user
+            //           user.value = data.user
 
             // Visa lista vid lyckad inloggning
             showScreen.value = 'home'
@@ -87,6 +87,16 @@ header {
     display: initial;
     margin: 2rem 2rem 0 0;
     width: 80px;
+}
+
+.logout {
+    content: url("@/assets/images/logout.png");
+}
+
+@media (prefers-color-scheme: dark) {
+    .logout {
+        content: url("@/assets/images/logout_dark.png");
+    }
 }
 
 .logout {

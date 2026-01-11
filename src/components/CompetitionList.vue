@@ -82,9 +82,13 @@ ul {
     grid-template-columns: 1rem 1rem 30rem 1rem 1rem;
     grid-column-gap: 1em;
     list-style-type: none;
+    background-color:var(--color-background-alternating-even);
     padding: 0;
 }
 img {
     cursor: pointer;
+}
+ul:nth-child(odd) {
+    background-color: var(--color-background-alternating-odd);
 }
 </style>
