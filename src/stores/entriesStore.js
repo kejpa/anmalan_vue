@@ -19,6 +19,7 @@ const useEntriesStore = defineStore('entriesStore', () => {
               date: '',
               course: 'SCM',
           },
+          createdby:''
       })
   */
 

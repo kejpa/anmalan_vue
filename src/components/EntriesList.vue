@@ -6,16 +6,18 @@ import useCompetitionStore from "@/stores/competitionStore.js";
 import useEntriesStore from "@/stores/entriesStore.js";
 import {onMounted, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
+import useUserStore from "@/stores/userStore.js";
 
 const props = defineProps(['competitionid']);
 const competitionStore = useCompetitionStore();
 const {competition} = storeToRefs(competitionStore);
 const {allEntries} = storeToRefs(useEntriesStore());
 const {allSwimmers} = storeToRefs(useSwimmerStore());
+const {user} = storeToRefs(useUserStore());
 const sortOrder = ref('firstname asc');
 
-onMounted( () => {
-     useCompetitionStore().getCompetition(props.competitionid);
+onMounted(() => {
+    useCompetitionStore().getCompetition(props.competitionid);
 })
 watch(
     allEntries,
@@ -45,17 +47,6 @@ function sortedEntries() {
         }
     })
 }
-
-/*
-function sortEntries() {
-    if (!competition.value || !allSwimmers.value || !allEntries.value) return;
-    allEntries.value.sort((a, b) => {
-        if (a.swimmerid !== b.swimmerid) return getSwimmer(a.swimmerid)?.firstname > getSwimmer(b.swimmerid)?.firstname ? 1 : -1;
-        return competition.value.events.find(e => e.eventid === a.eventid).number - competition.value.events.find(e => e.eventid === b.eventid).number;
-
-    })
-}
- */
 
 function getSwimmer(swimmerid) {
     if (!allSwimmers) return;
@@ -90,7 +81,9 @@ function sortList(way) {
         <li>Tid</li>
         <li>&nbsp;</li>
     </ul>
-    <ul v-for="entry in sortedEntries()" :key="entry.id">
+    <ul v-for="entry in sortedEntries().filter(e => {
+     return user.isAdmin || e.createdby === user.id
+    })" :key="entry.id">
         <li>{{
                 `${getSwimmer(entry.swimmerid)?.firstname} ${getSwimmer(entry.swimmerid)?.lastname}`
             }}

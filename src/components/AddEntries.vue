@@ -8,10 +8,12 @@ import notAllowed from '@/assets/images/notAllowed.png'
 import useEntriesStore from "@/stores/entriesStore.js";
 import useCompetitionStore from "@/stores/competitionStore.js";
 import useSwimmerStore from "@/stores/swimmerStore.js";
+import useUserStore from "@/stores/userStore.js";
 
 const props = defineProps(['competitionId', 'swimmer'])
 const emit = defineEmits(['close'])
 
+const {user}=storeToRefs(useUserStore())
 const competitionStore = useCompetitionStore();
 const {competition} = storeToRefs(competitionStore)
 const swimmerStore = useSwimmerStore();
@@ -107,6 +109,7 @@ function addEntry(eventid, entryInfo) {
         entryInfo = {swimtime: entryInfo, course: competition.value.course}
     }
     entry.info = entryInfo
+    entry.createdby=user.value.id
 
     entries.value.push(entry)
     entriesStore.saveEntry(entry)

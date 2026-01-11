@@ -150,6 +150,7 @@ ul {
     list-style: none;
     background-color:var(--color-background-alternating-even);
     padding-left: .5em;
+    cursor: pointer;
 }
 
 .header li {
