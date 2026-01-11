@@ -21,16 +21,17 @@ onMounted(() => {
 function downloadEntries(id) {
     APIServices.getBlob(`entriesFile?id=${id}`)
         .then((blob) => {
-            const fileUrl=window.URL.createObjectURL(blob)
-            const aTagg=document.createElement('a')
-            aTagg.href=fileUrl
-            aTagg.download='anmalan.lef'
+            const fileUrl = window.URL.createObjectURL(blob)
+            const aTagg = document.createElement('a')
+            aTagg.href = fileUrl
+            aTagg.download = 'anmalan.lef'
             document.body.appendChild(aTagg)
             aTagg.click()
             document.body.removeChild(aTagg)
             window.URL.revokeObjectURL(fileUrl)
         })
 }
+
 function removeCompetition(id) {
     competitionStore.removeCompetition(id)
 }
@@ -63,14 +64,21 @@ function sortedCompetitions() {
             </router-link>
         </li>
         <li v-else>&nbsp;</li>
-        <li>
+        <li v-if="competition.lastEntry > (new Date()).toLocaleDateString()">
+            <router-link :to="'/anmalningar/' + competition.id">
+                {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
+            </router-link>
+        </li>
+        <li v-else>
             {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
         </li>
         <li>
-            <img :src="download" height="16" title="Download" @click="downloadEntries(competition.id)">
+            <img :src="download" height="16" title="Download"
+                 @click="downloadEntries(competition.id)">
         </li>
         <li v-if="user.isAdmin">
-            <img :src="remove" height="16" title="Radera" @click="removeCompetition(competition.id)">
+            <img :src="remove" height="16" title="Radera"
+                 @click="removeCompetition(competition.id)">
         </li>
         <li v-else>&nbsp;</li>
     </ul>
@@ -82,12 +90,18 @@ ul {
     grid-template-columns: 1rem 1rem 30rem 1rem 1rem;
     grid-column-gap: 1em;
     list-style-type: none;
-    background-color:var(--color-background-alternating-even);
+    background-color: var(--color-background-alternating-even);
     padding: 0;
 }
-img {
+
+li a {
+    color: var(--color-text);
+}
+
+a {
     cursor: pointer;
 }
+
 ul:nth-child(odd) {
     background-color: var(--color-background-alternating-odd);
 }
