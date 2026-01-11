@@ -50,7 +50,6 @@ const router = createRouter({
                 // Se till att tävlingen är laddad
                 if (!competition.value.id) {
                     await competitionStore.getCompetition(id)
-                    console.log(competition.value.id)
                 }
 
                 // Blockera om edits inte är tillåtna

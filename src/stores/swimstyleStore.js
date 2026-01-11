@@ -6,16 +6,20 @@ const useSwimstyleStore = defineStore('swimstyleStore', () => {
     const allSwimstyles = ref([])
 
     function fetch() {
-        return new Promise((resolve, reject) =>
-            APIServices.get('getSwimstyles')
-                .then((data) => {
-                    allSwimstyles.value = data
-                    resolve(true)
-                })
-                .catch((error) => {
-                    console.error('Error fetching swim styles:', error)
-                    reject(error)
-                }),
+        return new Promise((resolve, reject) => {
+                if (allSwimstyles.value.length > 0) {
+                    return resolve(true)
+                }
+                APIServices.get('getSwimstyles')
+                    .then((data) => {
+                        allSwimstyles.value = data
+                        resolve(true)
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching swim styles:', error)
+                        reject(error)
+                    })
+            }
         )
     }
 
