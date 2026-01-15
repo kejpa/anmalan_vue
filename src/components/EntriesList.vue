@@ -4,7 +4,7 @@ import remove from "@/assets/images/delete.png";
 import useSwimmerStore from "@/stores/swimmerStore.js";
 import useCompetitionStore from "@/stores/competitionStore.js";
 import useEntriesStore from "@/stores/entriesStore.js";
-import {onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
 import useUserStore from "@/stores/userStore.js";
 
@@ -15,7 +15,20 @@ const {allEntries} = storeToRefs(useEntriesStore());
 const {allSwimmers} = storeToRefs(useSwimmerStore());
 const {user} = storeToRefs(useUserStore());
 const sortOrder = ref('firstname asc');
-
+const swimmersCount = computed(() => {
+    return allEntries.value
+        .filter(e => user.value.isAdmin || e.createdby === user.value.id)
+        .reduce((acc, itm) => {
+            acc.add(itm.swimmerid)
+            return acc
+        }, new Set())
+        .size
+})
+const entriesCount = computed(() => {
+    return allEntries.value.filter(e => {
+        return user.value.isAdmin || e.createdby === user.value.id
+    }).length
+})
 onMounted(() => {
     useCompetitionStore().getCompetition(props.competitionid);
 })
@@ -73,7 +86,7 @@ function sortList(way) {
 </script>
 
 <template>
-
+    <p>{{ entriesCount }} anmälningar för {{ swimmersCount }} simmare</p>
     <ul class="header">
         <li class="sort" @click="sortList('firstname')">Namn</li>
         <li>Född</li>

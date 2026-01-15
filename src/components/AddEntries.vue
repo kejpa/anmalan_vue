@@ -135,7 +135,7 @@ function removeEntry(entry) {
             <div id="close" @click="closeModal()">×</div>
             <h1>Anmälningar för {{ props.swimmer?.firstname ?? 'Lasse-gurra' }}
                 {{ props.swimmer?.lastname ?? 'Aktersnurra' }}
-                ({{ props.swimmer?.license ? props.swimmer.license : 'Ingen licens' }})</h1>
+                ({{ props.swimmer?.license ? props.swimmer.license : props.swimmer.birthdate }})</h1>
             <ul v-for="event in swimmerEvents.filter(e => e.hasSwimmerEntry===false)"
                 :key="event.event.eventid">
                 <li>{{ event.event.number }}</li>
