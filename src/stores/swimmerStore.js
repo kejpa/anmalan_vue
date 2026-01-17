@@ -45,11 +45,18 @@ const useSwimmerStore = defineStore('swimmerStore', () => {
         return loadPromise
     }
 
+    async function add(swimmer) {
+        if(!swimmer.id) {
+            swimmer=await APIServices.post('addSwimmer', swimmer)
+            allSwimmers.value.push(swimmer)
+            return swimmer
+        }
+    }
 
     async function getResults(competitionId, swimmerId) {
         return APIServices.get(`getResults?competitionId=${competitionId}&swimmerId=${swimmerId}`)
     }
 
-    return {getAllSwimmers, getResults, allSwimmers}
+    return {getAllSwimmers, getResults, allSwimmers, add}
 })
 export default useSwimmerStore

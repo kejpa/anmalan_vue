@@ -7,10 +7,12 @@ import {onMounted, ref} from "vue";
 import useEntriesStore from "@/stores/entriesStore.js";
 import {useRoute} from "vue-router";
 import EntriesList from "@/components/EntriesList.vue";
+import AddSwimmer from "@/components/AddSwimmer.vue";
 
 const route = useRoute()
 const entriesStore = useEntriesStore()
 const showEntries = ref(false)
+const showNewSwimmer = ref(false)
 const swimmer = ref({})
 
 onMounted(async () => {
@@ -26,17 +28,25 @@ function closeModal() {
     showEntries.value = false
     swimmer.value = null
 }
+function openAddSwimmer() {
+    showNewSwimmer.value = true
+}
+function closeNewSwimmer() {
+    showNewSwimmer.value = false
+}
 </script>
 
 <template>
     <AddEntries v-if="showEntries" :competition-id="$route.params.id" :swimmer="swimmer"
                 @close="closeModal()"/>
+    <AddSwimmer v-if="showNewSwimmer"  @close="closeNewSwimmer"/>
     <main>
         <header>
             <CompetitionInfo :competitionid="$route.params.id"/>
         </header>
         <div id="swimmers">
             <h2>Simmare</h2>
+            <button @click="openAddSwimmer">Ny simmare</button>
             <SwimmersList :competitionid="$route.params.id" @select="openModal"/>
         </div>
         <div id="entries">

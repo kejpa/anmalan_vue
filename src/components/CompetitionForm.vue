@@ -113,7 +113,6 @@ function setSessionDate(e) {
         <fieldset id="events">
             <legend>Grenar</legend>
             <EventsList :competitionid="props.competitionid"/>
-            <button @click="addEvent">Lägg till gren</button>
         </fieldset>
         <button v-if="competition.id===''" type="submit">Skapa Tävling</button>
         <button v-else type="submit">Spara Tävling</button>

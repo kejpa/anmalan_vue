@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, nextTick} from "vue";
 import {storeToRefs} from "pinia";
 import add from '@/assets/images/add.png'
 import remove from '@/assets/images/delete.png'
@@ -15,6 +15,7 @@ const {competition} = storeToRefs(competitionStore)
 const swimstyleStore = useSwimstyleStore()
 const {allSwimstyles} = storeToRefs(swimstyleStore)
 const tempEventnumber = ref(competition.value.events.map(e => e.number));
+const swimstyleSelects = ref([]);
 
 onMounted(async () => {
     await (swimstyleStore.fetch() && competitionStore.getCompetition(props.competitionid))
@@ -62,6 +63,13 @@ function addEvent(e) {
     }
     competition.value.events.push(event)
     tempEventnumber.value = competition.value.events.map(e => e.number)
+
+    nextTick(() => {
+        const lastIndex = swimstyleSelects.value.length - 1
+        if (swimstyleSelects.value[lastIndex]) {
+            swimstyleSelects.value[lastIndex].focus()
+        }
+    })
 }
 
 function nextEventId() {
@@ -102,6 +110,7 @@ function nextEventId() {
         </li>
         <li>
             <select v-model="swimEvent.swimstyleid"
+                    :ref="el => swimstyleSelects[index] = el"
                     @change="swimEvent.name = $event.target.options[$event.target.selectedIndex].text">
                 <option
                     v-for="swimstyle in allSwimstyles.filter(swimstyle => swimstyle.course === competition.course)"
