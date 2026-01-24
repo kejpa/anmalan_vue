@@ -83,7 +83,7 @@ function setSessionDate(e) {
             <legend>Anmälningstider</legend>
             <label>
                 Anmälan senast:
-                <input type="date" v-model="competition.lastEntry" required/>
+                <input type="datetime-local" v-model="competition.lastEntry" required/>
             </label>
             <label>
                 Tider uppnådda from:

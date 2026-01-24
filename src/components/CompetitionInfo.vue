@@ -14,6 +14,7 @@ watchEffect(() => {
 <template>
     <h3>{{ competition.name }}</h3>
     <p>{{ competition.city }} | {{ competition.course }} | {{ competition.date }}</p>
+    <p>Anmälan senast {{ new Date(competition.lastEntry).toLocaleString().slice(0,-3) }}</p>
 </template>
 
 <style scoped>

@@ -46,8 +46,14 @@ function sortedCompetitions() {
 
 <template>
     <h1>Tävlingar</h1>
+    <ul class="header">
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+        <li>Tävling</li>
+        <li>Anmälan senast</li>
+    </ul>
     <ul v-for="competition in sortedCompetitions()" :key="competition.id">
-        <li v-if="competition.lastEntry > (new Date()).toLocaleDateString()">
+        <li v-if="new Date(competition.lastEntry).toLocaleString() > (new Date()).toLocaleString()">
             <router-link :to="'/anmalningar/' + competition.id">
                 <img :src="enter" height="16" title="Lägg in anmälningar">
             </router-link>
@@ -64,13 +70,16 @@ function sortedCompetitions() {
             </router-link>
         </li>
         <li v-else>&nbsp;</li>
-        <li v-if="competition.lastEntry > (new Date()).toLocaleDateString()">
+        <li v-if="new Date(competition.lastEntry).toLocaleString() > (new Date()).toLocaleString()">
             <router-link :to="'/anmalningar/' + competition.id">
                 {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
             </router-link>
         </li>
         <li v-else>
             {{ competition.name }} - {{ new Date(competition.date).toLocaleDateString() }}
+        </li>
+        <li>
+            {{ new Date(competition.lastEntry).toLocaleString().slice(0, -3) }}
         </li>
         <li>
             <img :src="download" height="16" title="Download"
@@ -87,11 +96,23 @@ function sortedCompetitions() {
 <style scoped>
 ul {
     display: grid;
-    grid-template-columns: 1rem 1rem 30rem 1rem 1rem;
+    grid-template-columns: 1rem 1rem 30rem 20rem 1rem 1rem;
     grid-column-gap: 1em;
     list-style-type: none;
     background-color: var(--color-background-alternating-even);
     padding: 0;
+}
+
+ul:nth-child(odd) {
+    background-color: var(--color-background-alternating-odd);
+}
+
+ul.header {
+    background-color: var(--color-background-header);
+}
+
+ul.header li {
+    font-weight: bold;
 }
 
 li a {
@@ -102,7 +123,4 @@ a {
     cursor: pointer;
 }
 
-ul:nth-child(odd) {
-    background-color: var(--color-background-alternating-odd);
-}
 </style>
